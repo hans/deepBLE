@@ -1,12 +1,12 @@
 import codecs
 import logging
-import pickle
 import sys
 
 from gensim.models import Word2Vec
 from pybrain.datasets import SupervisedDataSet
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.tools.shortcuts import buildNetwork
+from pybrain.tools.xml.networkwriter import NetworkWriter
 from scipy.spatial import distance
 
 
@@ -17,7 +17,7 @@ def learn(vsm_source, vsm_target, seeds, hidden_layer_size=100, bias=True,
     input_size = vsm_source.layer1_size
     output_size = vsm_target.layer1_size
     network = buildNetwork(input_size, hidden_layer_size, output_size,
-                           bias=bias, fast=False)
+                           bias=bias, fast=True)
 
     dataset = SupervisedDataSet(vsm_source.layer1_size, vsm_target.layer1_size)
     for source_word, target_word in seeds:
@@ -70,10 +70,8 @@ if __name__ == '__main__':
 
     with codecs.open(sys.argv[3], 'r', encoding='utf-8') as seeds_file:
         seeds = [tuple(line.strip().split('\t')) for line in seeds_file]
-        print seeds
 
     model = learn(vsm_source, vsm_target, seeds)
-    with open('translation-network', 'wb') as network_file:
-        pickle.dump(model, network_file)
+    NetworkWriter.writeToFile(model, 'translation-network.xml')
 
     print test_word(model, vsm_source, vsm_target, 'cat')
