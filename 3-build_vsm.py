@@ -5,6 +5,11 @@ from gensim import corpora
 from gensim.models import Word2Vec
 from gensim.utils import tokenize
 
+
+WINDOW_SIZE = 3
+MINIMUM_TOKEN_COUNT = 5
+
+
 class SentenceGen(object):
     def __init__(self, dictionary, corpus_path):
         self.dictionary = dictionary
@@ -25,7 +30,8 @@ def main(corpus_path, out_path):
 
     sentences = SentenceGen(dictionary, corpus_path)
 
-    model = Word2Vec(sentences, min_count=5, workers=4)
+    model = Word2Vec(sentences, window=WINDOW_SIZE,
+                     min_count=MINIMUM_TOKEN_COUNT, workers=4)
     model.save(out_path)
 
     # print '-- Serializing MmCorpus'
