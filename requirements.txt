@@ -1,0 +1,7 @@
+PyBrain==0.3
+gensim==0.9.1
+gevent==1.0
+greenlet==0.4.2
+ipython==2.0.0
+numpy==1.8.1
+scipy==0.13.3
