@@ -1,2 +1,10 @@
 .DS_Store
 *.pyc
+
+# virtualenv
+.Python
+bin
+include
+lib
+man
+share
