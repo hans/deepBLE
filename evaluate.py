@@ -7,6 +7,7 @@ import codecs
 import logging
 
 from gensim.models import Word2Vec
+import gevent
 from numpy import mean, std
 
 import model
@@ -49,7 +50,11 @@ def evaluate_model(model_class, model_args, source_vsm, target_vsm, data):
     model = model_class(source_vsm, target_vsm, **model_args)
     model.train(training_pairs)
 
-    scores = [score(model, pair) for pair in test_pairs]
+    score_greenlets = [gevent.spawn(score, model, pair)
+                       for pair in test_pairs]
+    gevent.joinall(score_greenlets)
+
+    scores = [greenlet.value for greenlet in score_greenlets]
     logging.debug("Scores: %r" % scores)
 
     return mean(scores), std(scores)
