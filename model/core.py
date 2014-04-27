@@ -48,7 +48,7 @@ class TranslationModel(object):
 
         target_vec = self.translate_vec(source_vec)
 
-        # TODO use KD tree for nearest-neighbor lookup
+        # TODO use KD tree (or NearPy?) for nearest-neighbor lookup
         ret = sorted(self.target_vsm.vocab.iterkeys(),
                      key=lambda v: distance.cosine(target_vec,
                                               self.target_vsm[v]))
