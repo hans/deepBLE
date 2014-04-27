@@ -1,4 +1,4 @@
-from numpy.spatial import distance
+from scipy.spatial import distance
 
 
 class TranslationModel(object):
