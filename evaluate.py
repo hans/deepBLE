@@ -5,13 +5,12 @@ data.
 import argparse
 import codecs
 from datetime import date
-from functools import partial
 import logging
+from multiprocessing.pool import Pool
 import random
 import sys
 
 from gensim.models import Word2Vec
-from gevent.pool import Pool
 from numpy import mean, std
 
 import model
@@ -25,7 +24,8 @@ def train_test_split(data, training_pct=80):
     return data[:split], data[split:]
 
 
-def score(model, (source_word, target_word), threshold=20):
+MODEL = None
+def score((source_word, target_word), threshold=20):
     """Test the given model on the given `(source_word, target_word)`
     pair and return a score describing its performance.
 
@@ -33,7 +33,7 @@ def score(model, (source_word, target_word), threshold=20):
     translation)."""
 
     try:
-        predictions = model.translate(source_word, n=threshold)
+        predictions = MODEL.translate(source_word, n=threshold)
     except ValueError:
         # Translation error
         logging.exception("Translation error")
@@ -61,8 +61,11 @@ def evaluate_model(model, data, do_train=True):
     else:
         test_pairs = data
 
-    pool = Pool(10)
-    scores = [x for x in pool.imap_unordered(partial(score, model), test_pairs)
+    global MODEL
+    MODEL = model
+
+    pool = Pool(4)
+    scores = [x for x in pool.imap_unordered(score, test_pairs)
               if x is not None]
     logging.debug("Scores: %r" % scores)
 
