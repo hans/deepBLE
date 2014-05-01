@@ -135,5 +135,6 @@ if __name__ == '__main__':
 
     if do_train:
         # We just trained a model -- save it somewhere
-        model_name = "model-{}-{}".format(arguments.model, date.isoformat())
+        model_name = "model-{}-{}".format(arguments.model,
+                                          date.today().isoformat())
         model.save(model_name)
