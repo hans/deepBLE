@@ -22,7 +22,7 @@ def train_test_split(data, training_pct=80):
     return data[:split], data[split:]
 
 
-def score(model, (source_word, target_word), threshold=5):
+def score(model, (source_word, target_word), threshold=20):
     """Test the given model on the given `(source_word, target_word)`
     pair and return a score describing its performance.
 
