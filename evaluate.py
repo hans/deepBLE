@@ -4,10 +4,12 @@ data.
 
 import argparse
 import codecs
+from functools import partial
 import logging
+import sys
 
 from gensim.models import Word2Vec
-import gevent
+from gevent.pool import Pool
 from numpy import mean, std
 
 import model
@@ -27,7 +29,12 @@ def score(model, (source_word, target_word), threshold=5):
     The score is bounded between 0 (worst) and 1 (perfect
     translation)."""
 
-    predictions = model.translate(source_word)
+    try:
+        predictions = model.translate(source_word, n=threshold)
+    except ValueError:
+        # Translation error
+        logging.exception("Translation error")
+        return None
 
     try:
         rank = predictions.index(target_word)
@@ -39,41 +46,32 @@ def score(model, (source_word, target_word), threshold=5):
     return score
 
 
-def evaluate_model(model_class, model_args, source_vsm, target_vsm, data):
+def evaluate_model(model, data, do_train=True):
     """Evaluate the performance of a translation model. Returns the mean
     and standard deviation of scores among data tuples used for testing
     (where a score ranges between 0 (worst) and 1 (perfect
     translation))."""
 
-    training_pairs, test_pairs = train_test_split(data)
+    if do_train:
+        training_pairs, test_pairs = train_test_split(data)
+        model.train(training_pairs)
+    else:
+        test_pairs = data
 
-    model = model_class(source_vsm, target_vsm, **model_args)
-    model.train(training_pairs)
-
-    score_greenlets = [gevent.spawn(score, model, pair)
-                       for pair in test_pairs]
-    gevent.joinall(score_greenlets)
-
-    scores = [greenlet.value for greenlet in score_greenlets]
+    pool = Pool(10)
+    scores = [x for x in pool.imap_unordered(partial(score, model), test_pairs)
+              if x is not None]
     logging.debug("Scores: %r" % scores)
 
     return mean(scores), std(scores)
 
 
-MODEL_MAPPING = {
-    'linear': model.LinearTranslationModel,
-    'neural': model.NeuralTranslationModel,
-}
-
-if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
-                        level=logging.DEBUG)
-
+def parse_args():
     parser = argparse.ArgumentParser(
         description='Evaluate the performance of a model.')
 
     parser.add_argument('model', choices=MODEL_MAPPING.keys())
-    parser.add_argument('-f', '--model-file', type=open,
+    parser.add_argument('-f', '--model-file',
                         help=('Saved model file (only supported for '
                               'some models)'))
     parser.add_argument('-s', '--vsm-source', required=True,
@@ -86,19 +84,45 @@ if __name__ == '__main__':
                         help=('Path to data TSV file (used for model '
                               'seeding (if training) and testing)'))
 
-    arguments = parser.parse_args()
+    return parser.parse_args()
+
+
+MODEL_MAPPING = {
+    'linear': model.LinearTranslationModel,
+    'neural': model.NeuralTranslationModel,
+}
+
+if __name__ == '__main__':
+    logging.getLogger().setLevel(logging.DEBUG)
+    # logging.getLogger().setFormatter(
+    #     logging.Formatter('%(asctime)s : %(levelname)s : %(message)s'))
+
+    arguments = parse_args()
 
     vsm_source = Word2Vec.load(arguments.vsm_source)
     vsm_target = Word2Vec.load(arguments.vsm_target)
 
-    # TODO handle model file parameter
-
+    # Instantiate model
     model_class = MODEL_MAPPING[arguments.model]
+    model = model_class(vsm_source, vsm_target)
+
+    if arguments.model_file is not None:
+        logging.debug("Loading model from file '{}'"
+                      .format(arguments.model_file))
+
+        try:
+            model.load(arguments.model_file)
+        except NotImplementedError:
+            logging.error("Requested model does not support loading from "
+                          "saved files")
+            sys.exit(1)
+
+    # Load seed data
     with codecs.open(arguments.data, 'r', encoding='utf-8') as data_file:
         data = [tuple(line.strip().split('\t')) for line in data_file]
 
-    # TODO print nicely
-    print evaluate_model(model_class, {}, vsm_source, vsm_target, data)
+    # Do we need to train the model?
+    do_train = arguments.model_file is None
 
-    if arguments.model_file:
-        arguments.model_file.close()
+    # TODO print nicely
+    print evaluate_model(model, data, do_train)
