@@ -4,8 +4,10 @@ data.
 
 import argparse
 import codecs
+from datetime import date
 from functools import partial
 import logging
+import random
 import sys
 
 from gensim.models import Word2Vec
@@ -127,3 +129,8 @@ if __name__ == '__main__':
 
     # TODO print nicely
     print evaluate_model(model, data, do_train)
+
+    if do_train:
+        # We just trained a model -- save it somewhere
+        model_name = "model-{}-{}".format(arguments.model, date.isoformat())
+        model.save(model_name)
