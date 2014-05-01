@@ -18,6 +18,7 @@ import model
 def train_test_split(data, training_pct=80):
     """Split input data into training and test sets."""
 
+    random.shuffle(data)
     split = int(len(data) * (training_pct / 100.0))
     return data[:split], data[split:]
 
