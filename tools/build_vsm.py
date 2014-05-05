@@ -3,9 +3,10 @@ from codecs import open
 import logging
 import re
 
-from gensim.corpora import TextCorpus, WikiCorpus
+from gensim.corpora import TextCorpus
 from gensim.models import Word2Vec
-from gensim.utils import tokenize
+
+from corpora.wiki import WikiSentenceCorpus
 
 
 # TODO 3 builds better space than 5 -- do some more structured
@@ -16,42 +17,23 @@ MINIMUM_TOKEN_COUNT = 5
 SENTENCE_BOUNDARY = re.compile(r'\.(?!\d)')
 
 
-# TODO can this just be a function?
-class SentenceGen(object):
-    """A generator which yields tokenized sentences from a corpus.
-
-    The constructor accepts a single argument which is a corpus object.
-    If this corpus is a `TextCorpus`, it is assumed that each "document"
-    in the corpus is a single sentence. If it is a `WikiCorpus`, each
-    document is sentence-tokenized by this generator.
-    """
-
-    def __init__(self, corpus):
-        self.corpus = corpus
-
-    def __iter__(self):
-        if isinstance(self.corpus, TextCorpus):
-            for sentence in self.corpus.get_texts():
-                yield sentence
-        elif isinstance(self.corpus, WikiCorpus):
-            for document in self.corpus.get_texts():
-                for sentence in re.split(SENTENCE_BOUNDARY, document):
-                    yield tokenize(sentence, lowercase=True)
-
-
 CORPUS_TYPES = {
     'plain': TextCorpus,
-    'wiki': WikiCorpus
+    'wiki': WikiSentenceCorpus
 }
 
 
 def main(corpus_path, corpus_type, out_path):
     logging.debug('Building corpus')
     corpus = CORPUS_TYPES[corpus_type](corpus_path)
-    sentences = SentenceGen(corpus)
+    # sentences = SentenceGen(corpus)
+    documents = corpus.get_texts()
 
     logging.debug('Now beginning VSM construction with Word2Vec')
-    model = Word2Vec(sentences, window=WINDOW_SIZE,
+
+    # TODO Word2Vec expects sentences, and we're giving it documents..
+    # is this a problem?
+    model = Word2Vec(documents, window=WINDOW_SIZE,
                      min_count=MINIMUM_TOKEN_COUNT, workers=4)
     model.save(out_path)
 
