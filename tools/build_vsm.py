@@ -1,7 +1,9 @@
+import argparse
 from codecs import open
-import sys
+import logging
+import re
 
-from gensim import corpora
+from gensim.corpora import TextCorpus, WikiCorpus
 from gensim.models import Word2Vec
 from gensim.utils import tokenize
 
@@ -11,45 +13,64 @@ from gensim.utils import tokenize
 WINDOW_SIZE = 3
 MINIMUM_TOKEN_COUNT = 5
 
+SENTENCE_BOUNDARY = re.compile(r'\.(?!\d)')
 
+
+# TODO can this just be a function?
 class SentenceGen(object):
-    def __init__(self, dictionary, corpus_path):
-        self.dictionary = dictionary
-        self.corpus_path = corpus_path
+    """A generator which yields tokenized sentences from a corpus.
+
+    The constructor accepts a single argument which is a corpus object.
+    If this corpus is a `TextCorpus`, it is assumed that each "document"
+    in the corpus is a single sentence. If it is a `WikiCorpus`, each
+    document is sentence-tokenized by this generator.
+    """
+
+    def __init__(self, corpus):
+        self.corpus = corpus
 
     def __iter__(self):
-        with open(self.corpus_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                yield tokenize(line, lowercase=True)
+        if isinstance(self.corpus, TextCorpus):
+            for sentence in self.corpus.get_texts():
+                yield sentence
+        elif isinstance(self.corpus, WikiCorpus):
+            for document in self.corpus.get_texts():
+                for sentence in re.split(SENTENCE_BOUNDARY, document):
+                    yield tokenize(sentence, lowercase=True)
 
 
-def main(corpus_path, out_path):
-    print '-- Beginning dictionary construction'
-    with open(corpus_path, 'r') as f:
-        dictionary = corpora.Dictionary(tokenize(line, lowercase=True)
-                                        for line in f)
-    print '-- Finished building dictionary'
+CORPUS_TYPES = {
+    'plain': TextCorpus,
+    'wiki': WikiCorpus
+}
 
-    sentences = SentenceGen(dictionary, corpus_path)
 
+def main(corpus_path, corpus_type, out_path):
+    logging.debug('Building corpus')
+    corpus = CORPUS_TYPES[corpus_type](corpus_path)
+    sentences = SentenceGen(corpus)
+
+    logging.debug('Now beginning VSM construction with Word2Vec')
     model = Word2Vec(sentences, window=WINDOW_SIZE,
                      min_count=MINIMUM_TOKEN_COUNT, workers=4)
     model.save(out_path)
 
-    # print '-- Serializing MmCorpus'
-    # corpora.MmCorpus.serialize(out_path, corpus)
-    # print '-- Finished serializing MmCorpus'
-
-    # print '-- Calculating TFIDF'
-    # corpus_tfidf = models.TfidfModel(corpus)[corpus]
-
-    # print '-- Running LSA'
-    # lsa = lsimodel.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=100)
-    # corpus_lsa = lsa[corpus_tfidf]
-
-    # print '-- Serializing LSA'
-    # corpora.MmCorpus.serialize(out_path + '.lsa', corpus_lsa)
-
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2])
+    parser = argparse.ArgumentParser(
+        description='Build a vector-space model from a text corpus.')
+
+    parser.add_argument('corpus_path', help='Path to a text corpus')
+    parser.add_argument('out_path',
+                        help='Path to which to save the generated VSM')
+    parser.add_argument('-t', '--type', choices=CORPUS_TYPES.keys(),
+                        help='Format of the given corpus',
+                        default='plain')
+    parser.add_argument('-v', '--verbose', action='store_true')
+
+    arguments = parser.parse_args()
+
+    if arguments.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+
+    main(arguments.corpus_path, arguments.type, arguments.out_path)
