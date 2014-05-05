@@ -14,9 +14,9 @@ class NeuralTranslationModel(TranslationModel):
     """True if the neural network should include bias units in its input
     and hidden layers."""
 
-    HIDDEN_LAYER_SIZE = 100
+    HIDDEN_LAYER_SIZE = 1000
 
-    LEARNING_RATE = 0.075
+    LEARNING_RATE = 0.01
 
     def __init__(self, source_vsm, target_vsm, bias=BIAS,
                  hidden_layer_size=HIDDEN_LAYER_SIZE,
