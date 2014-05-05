@@ -4,7 +4,7 @@ data.
 
 import argparse
 import codecs
-from datetime import date
+from datetime import datetime
 import logging
 from multiprocessing.pool import Pool
 import random
@@ -58,6 +58,13 @@ def evaluate_model(model, data, do_train=True):
     if do_train:
         training_pairs, test_pairs = train_test_split(data)
         model.train(training_pairs)
+
+        # We just trained a model -- save it somewhere
+        now = datetime.now()
+        model_name = ("saved_models/model-{}-{}-{:02d}{:02d}"
+                      .format(model.__class__.__name__, now.date().isoformat(),
+                              now.hour, now.minute))
+        model.save(model_name)
     else:
         test_pairs = data
 
@@ -132,9 +139,3 @@ if __name__ == '__main__':
 
     # TODO print nicely
     print evaluate_model(model, data, do_train)
-
-    if do_train:
-        # We just trained a model -- save it somewhere
-        model_name = "model-{}-{}".format(arguments.model,
-                                          date.today().isoformat())
-        model.save(model_name)
