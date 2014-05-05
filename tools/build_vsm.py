@@ -6,6 +6,8 @@ from gensim.models import Word2Vec
 from gensim.utils import tokenize
 
 
+# TODO 3 builds better space than 5 -- do some more structured
+# evaluation of window sizes
 WINDOW_SIZE = 3
 MINIMUM_TOKEN_COUNT = 5
 
