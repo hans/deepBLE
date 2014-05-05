@@ -26,6 +26,10 @@ class NeuralTranslationModel(TranslationModel):
         super(NeuralTranslationModel, self).__init__(source_vsm, target_vsm)
 
         self.network = None
+
+        self.vsm_source = source_vsm
+        self.vsm_target = target_vsm
+
         self.bias = bias
         self.hidden_layer_size = hidden_layer_size
         self.learning_rate = learning_rate
@@ -53,14 +57,15 @@ class NeuralTranslationModel(TranslationModel):
             dataset.addSample(source, target)
 
         trainer = BackpropTrainer(self.network, dataset,
-                                  learningrate=self.learning_rate)
+                                  learningrate=self.learning_rate,
+                                  verbose=True)
         trainer.trainUntilConvergence()
 
     def load(self, path):
         self.network = NetworkReader.readFrom(path)
 
     def save(self, path):
-        logging.info("Saved neural network model to '{}'".format(path))
+        logging.info("Saving neural network model to '{}'".format(path))
         NetworkWriter.writeToFile(self.network, path)
 
     def translate_vec(self, source_vec):
