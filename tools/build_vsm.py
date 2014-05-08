@@ -11,7 +11,7 @@ from corpora.wiki import WikiSentenceCorpus
 
 # TODO 3 builds better space than 5 -- do some more structured
 # evaluation of window sizes
-WINDOW_SIZE = 3
+WINDOW_SIZE = 5
 MINIMUM_TOKEN_COUNT = 5
 
 SENTENCE_BOUNDARY = re.compile(r'\.(?!\d)')
