@@ -1,8 +1,10 @@
 """Defines a corpus class for dealing with Wikipedia corpus data."""
 
 import bz2
+import codecs
 import logging
 import multiprocessing
+import os.path
 import re
 
 from gensim.corpora.wikicorpus import (ARTICLE_MIN_WORDS, WikiCorpus,
@@ -62,6 +64,13 @@ class WikiSentenceCorpus(WikiCorpus):
     def __init__(self, *args, **kwargs):
         super(WikiSentenceCorpus, self).__init__(*args, **kwargs)
 
+    def open_corpus_file(self):
+        _, extension = os.path.splitext(self.fname)
+        if extension == 'bz2':
+            return bz2.BZ2File(self.fname)
+        else:
+            return codecs.open(self.fname, encoding='utf-8')
+
     def get_texts(self):
         """
         Iterate over the corpus data, yielding sentences of the text
@@ -78,7 +87,7 @@ class WikiSentenceCorpus(WikiCorpus):
         n_articles, n_articles_all = 0, 0
         n_sentences, n_sentences_all = 0, 0
 
-        pages = _extract_pages(bz2.BZ2File(self.fname), self.filter_namespaces)
+        pages = _extract_pages(self.open_corpus_file, self.filter_namespaces)
         texts = ((text, self.lemmatize, title, pageid)
                  for title, text, pageid in pages)
 
