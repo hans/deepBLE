@@ -32,7 +32,7 @@ LOGGER = logging.getLogger('corpora.wiki')
 #
 # Probably hitting diminishing returns with this sentence segmentation
 # stuff.
-SENTENCE_BOUNDARY = re.compile(r"""(?<![\s(.][eig])[.!?](?:['"]\s)?(?![,\d])""")
+SENTENCE_BOUNDARY = re.compile(r"""(?<!\s)[.!?](?:['"]\s)?(?![,\d])""")
 
 
 def process_article(args):
