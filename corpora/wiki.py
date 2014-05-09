@@ -65,7 +65,12 @@ class WikiSentenceCorpus(WikiCorpus):
     """
 
     def __init__(self, *args, **kwargs):
+        dictionary_save_path = kwargs.pop('dictionary_save_path', None)
+
         super(WikiSentenceCorpus, self).__init__(*args, **kwargs)
+
+        if dictionary_save_path is not None:
+            self.dictionary.save(dictionary_save_path)
 
     def open_corpus_file(self):
         _, extension = os.path.splitext(self.fname)
