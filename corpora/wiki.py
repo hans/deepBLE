@@ -90,7 +90,7 @@ class WikiSentenceCorpus(WikiCorpus):
         n_articles, n_articles_all = 0, 0
         n_sentences, n_sentences_all = 0, 0
 
-        pages = _extract_pages(self.open_corpus_file, self.filter_namespaces)
+        pages = _extract_pages(self.open_corpus_file(), self.filter_namespaces)
         texts = ((text, self.lemmatize, title, pageid)
                  for title, text, pageid in pages)
 
