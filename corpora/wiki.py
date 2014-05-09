@@ -58,8 +58,11 @@ class WikiSentenceCorpus(WikiCorpus):
     Extends the built-in Gensim `WikiCorpus` to yield *sentences* rather
     than entire *documents* at a time. This corpus then matches the
     specifications of the `Word2Vec` Gensim model.
-    """
 
+    Several other notable extensions have been made:
+
+    - Support reading from uncompressed Wikipedia dump
+    """
 
     def __init__(self, *args, **kwargs):
         super(WikiSentenceCorpus, self).__init__(*args, **kwargs)
