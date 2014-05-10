@@ -4,6 +4,7 @@ import logging
 import re
 
 from gensim.corpora import TextCorpus
+from gensim.corpora.dictionary import Dictionary
 from gensim.models import Word2Vec
 
 from corpora.wiki import WikiSentenceCorpus
@@ -23,16 +24,26 @@ CORPUS_TYPES = {
 }
 
 
-def main(corpus_path, corpus_type, out_path):
+def main(corpus_path, corpus_type, out_path, dictionary_path,
+         dictionary_out_path):
+    if corpus_type != 'wiki' and (dictionary_path is not None
+                                  or dictionary_out_path is not None):
+        raise ValueError("Dictionary loading/saving only supported for "
+                         "'wiki' corpus type")
+
+    kwargs = {}
+    if corpus_type == 'wiki':
+        if dictionary_path is not None:
+            kwargs['dictionary'] = Dictionary.load(dictionary_path)
+        elif dictionary_out_path is not None:
+            kwargs['dictionary_save_path'] = dictionary_out_path
+
     logging.debug('Building corpus')
-    corpus = CORPUS_TYPES[corpus_type](corpus_path)
-    # sentences = SentenceGen(corpus)
+    corpus = CORPUS_TYPES[corpus_type](corpus_path, **kwargs)
     documents = corpus.get_texts()
 
     logging.debug('Now beginning VSM construction with Word2Vec')
 
-    # TODO Word2Vec expects sentences, and we're giving it documents..
-    # is this a problem?
     model = Word2Vec(documents, window=WINDOW_SIZE,
                      min_count=MINIMUM_TOKEN_COUNT, workers=4)
     model.save(out_path)
@@ -48,6 +59,15 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--type', choices=CORPUS_TYPES.keys(),
                         help='Format of the given corpus',
                         default='plain')
+
+    dictionary_opts = parser.add_mutually_exclusive_group()
+    dictionary_opts.add_argument('-d', '--dictionary-path',
+                                 help=('Path to a pre-built dictionary '
+                                       'corresponding to this corpus'))
+    dictionary_opts.add_argument('--dictionary-out-path',
+                                 help=('Path to which a computed '
+                                       'dictionary should be saved.'))
+
     parser.add_argument('-v', '--verbose', action='store_true')
 
     arguments = parser.parse_args()
@@ -55,4 +75,5 @@ if __name__ == '__main__':
     if arguments.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    main(arguments.corpus_path, arguments.type, arguments.out_path)
+    main(arguments.corpus_path, arguments.type, arguments.out_path,
+         arguments.dictionary_path, arguments.dictionary_out_path)
