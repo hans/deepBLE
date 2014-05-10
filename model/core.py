@@ -16,6 +16,31 @@ class TranslationModel(object):
             (source_word, translationally_equivalent_target_word)
         """
 
+        source_vecs, target_vecs = [], []
+        for source_word, target_word in seeds:
+            try:
+                source = self.vsm_source[source_word]
+            except KeyError:
+                logging.warn(u'Source VSM missing word {}'.format(source_word))
+                continue
+
+            try:
+                target = self.vsm_target[target_word]
+            except KeyError:
+                logging.warn(u'Target VSM missing word {}'.format(target_word))
+                continue
+
+            source_vecs.append(source)
+            target_vecs.append(target)
+
+        return self.train_vecs(source_vecs, target_vecs)
+
+    def train_vecs(self, source_vecs, target_vecs):
+        """Train the model on a vector seed set, two lists where the
+        `i`th element of `target_vecs` represents the translation of the
+        `i`th element of `source_vecs`.
+        """
+
         raise NotImplementedError("abstract method")
 
     def load(self, path):

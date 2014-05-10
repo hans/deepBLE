@@ -1,5 +1,6 @@
 import logging
 
+import numpy as np
 from pybrain.datasets import SupervisedDataSet
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.tools.shortcuts import buildNetwork
@@ -10,6 +11,10 @@ from model.core import TranslationModel
 
 
 class NeuralTranslationModel(TranslationModel):
+    """A translation model which trains a deep neural network on the
+    given training examples.
+    """
+
     BIAS = True
     """True if the neural network should include bias units in its input
     and hidden layers."""
@@ -34,27 +39,15 @@ class NeuralTranslationModel(TranslationModel):
         self.hidden_layer_size = hidden_layer_size
         self.learning_rate = learning_rate
 
-    def train(self, seeds):
+    def train_vecs(self, source_vecs, target_vecs):
         input_size = self.vsm_source.layer1_size
         output_size = self.vsm_target.layer1_size
         self.network = buildNetwork(input_size, self.hidden_layer_size,
                                     output_size, bias=self.bias, fast=True)
 
         dataset = SupervisedDataSet(input_size, output_size)
-        for source_word, target_word in seeds:
-            try:
-                source = self.vsm_source[source_word]
-            except KeyError:
-                logging.warn(u'Source VSM missing word {}'.format(source_word))
-                continue
-
-            try:
-                target = self.vsm_target[target_word]
-            except KeyError:
-                logging.warn(u'Target VSM missing word {}'.format(target_word))
-                continue
-
-            dataset.addSample(source, target)
+        dataset.setField('input', np.mat(source_vecs))
+        dataset.setField('output', np.mat(target_vecs))
 
         trainer = BackpropTrainer(self.network, dataset,
                                   learningrate=self.learning_rate,

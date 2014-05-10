@@ -11,27 +11,12 @@ class LinearTranslationModel(TranslationModel):
         super(LinearTranslationModel, self).__init__(source_vsm, target_vsm)
         self.matrix = None
 
-    def train(self, seeds):
-        source_vectors = []
-        target_vectors = []
-        for source_word, target_word in seeds:
-            if source_word not in self.source_vsm:
-                logging.warn(u"Training word '{}' not present in source VSM"
-                             .format(source_word))
-                continue
-            elif target_word not in self.target_vsm:
-                logging.warn(u"Training word '{}' not present in target VSM"
-                             .format(target_word))
-                continue
-
-            source_vectors.append(self.source_vsm[source_word])
-            target_vectors.append(self.target_vsm[target_word])
-
+    def train_vecs(self, source_vecs, target_vecs):
         # Training matrices, where each column represents a single word
         # in the source or target language and each row represents a
         # dimension in the source or target VSM
-        source_matrix = np.matrix(source_vectors).transpose()
-        target_matrix = np.matrix(target_vectors).transpose()
+        source_matrix = np.matrix(source_vecs).transpose()
+        target_matrix = np.matrix(target_vecs).transpose()
 
         # We have $F = AE$, where $F$ is our target matrix (each column
         # is a word embedding), $E$ is our target matrix, and $A$ is our
