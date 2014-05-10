@@ -47,6 +47,8 @@ def process_article(args):
     process_fn = utils.lemmatize if do_lemmatize else tokenize
     sentences = []
     for sentence in re.split(SENTENCE_BOUNDARY, text):
+        if not sentence:
+            continue
         sentences.append(process_fn(sentence))
 
     return sentences, title, pageid
