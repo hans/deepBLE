@@ -32,16 +32,13 @@ class NeuralTranslationModel(TranslationModel):
 
         self.network = None
 
-        self.vsm_source = source_vsm
-        self.vsm_target = target_vsm
-
         self.bias = bias
         self.hidden_layer_size = hidden_layer_size
         self.learning_rate = learning_rate
 
     def train_vecs(self, source_vecs, target_vecs):
-        input_size = self.vsm_source.layer1_size
-        output_size = self.vsm_target.layer1_size
+        input_size = self.source_vsm.layer1_size
+        output_size = self.target_vsm.layer1_size
         self.network = buildNetwork(input_size, self.hidden_layer_size,
                                     output_size, bias=self.bias, fast=True)
 

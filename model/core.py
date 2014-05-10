@@ -1,3 +1,5 @@
+import logging
+
 from scipy.spatial import distance
 
 
@@ -19,13 +21,13 @@ class TranslationModel(object):
         source_vecs, target_vecs = [], []
         for source_word, target_word in seeds:
             try:
-                source = self.vsm_source[source_word]
+                source = self.source_vsm[source_word]
             except KeyError:
                 logging.warn(u'Source VSM missing word {}'.format(source_word))
                 continue
 
             try:
-                target = self.vsm_target[target_word]
+                target = self.target_vsm[target_word]
             except KeyError:
                 logging.warn(u'Target VSM missing word {}'.format(target_word))
                 continue

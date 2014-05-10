@@ -107,7 +107,11 @@ def parse_args():
                               'pass to the model (of the form )'))
 
     arguments = parser.parse_args()
-    arguments.model_arguments = dict(arguments.model_arguments)
+
+    if arguments.model_arguments is None:
+        arguments.model_arguments = {}
+    else:
+        arguments.model_arguments = dict(arguments.model_arguments)
 
     return arguments
 
