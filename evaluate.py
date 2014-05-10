@@ -64,7 +64,12 @@ def evaluate_model(model, data, do_train=True):
         model_name = ("saved_models/model-{}-{}-{:02d}{:02d}"
                       .format(model.__class__.__name__, now.date().isoformat(),
                               now.hour, now.minute))
-        model.save(model_name)
+
+        try:
+            model.save(model_name)
+        except NotImplementedError:
+            logging.info("Model does not support saving to files; "
+                         "skipping save")
     else:
         test_pairs = data
 
