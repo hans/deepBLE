@@ -79,6 +79,11 @@ def evaluate_model(model, data, do_train=True):
     return mean(scores), std(scores)
 
 
+def parse_cmdline_kwarg(kwarg):
+    param, value = kwarg.split('=')
+    return param, float(value)
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Evaluate the performance of a model.')
@@ -96,8 +101,15 @@ def parse_args():
     parser.add_argument('-d', '--data', required=True,
                         help=('Path to data TSV file (used for model '
                               'seeding (if training) and testing)'))
+    parser.add_argument('-m', '--model-arguments', action='append',
+                        type=parse_cmdline_kwarg,
+                        help=('Float or integer keyword arguments to '
+                              'pass to the model (of the form )'))
 
-    return parser.parse_args()
+    arguments = parser.parse_args()
+    arguments.model_arguments = dict(arguments.model_arguments)
+
+    return arguments
 
 
 MODEL_MAPPING = {
@@ -117,7 +129,7 @@ if __name__ == '__main__':
 
     # Instantiate model
     model_class = MODEL_MAPPING[arguments.model]
-    model = model_class(vsm_source, vsm_target)
+    model = model_class(vsm_source, vsm_target, **arguments.model_arguments)
 
     if arguments.model_file is not None:
         logging.debug("Loading model from file '{}'"
