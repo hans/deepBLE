@@ -1,7 +1,6 @@
 """Defines a corpus class for dealing with Wikipedia corpus data."""
 
 import bz2
-import codecs
 import logging
 import multiprocessing
 import os.path
@@ -77,7 +76,7 @@ class WikiSentenceCorpus(WikiCorpus):
         if extension == 'bz2':
             return bz2.BZ2File(self.fname)
         else:
-            return codecs.open(self.fname, encoding='utf-8')
+            return open(self.fname)
 
     def get_texts(self):
         """
