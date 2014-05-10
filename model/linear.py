@@ -25,7 +25,7 @@ class LinearTranslationModel(TranslationModel):
         # Then $A = F E^{-1}$.
         self.matrix = target_matrix * pinv(source_matrix)
 
-    def translate_vec(self, source_vec, n=5):
+    def translate_vec(self, source_vec):
         if self.matrix is None:
             raise RuntimeError("Model not yet trained")
 
