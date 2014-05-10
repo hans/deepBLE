@@ -10,12 +10,8 @@ from gensim.models import Word2Vec
 from corpora.wiki import WikiSentenceCorpus
 
 
-# TODO 3 builds better space than 5 -- do some more structured
-# evaluation of window sizes
-WINDOW_SIZE = 10
-MINIMUM_TOKEN_COUNT = 100
-
-SENTENCE_BOUNDARY = re.compile(r'\.(?!\d)')
+DEFAULT_WINDOW_SIZE = 10
+DEFAULT_MINIMUM_TOKEN_COUNT = 200
 
 
 CORPUS_TYPES = {
@@ -24,32 +20,7 @@ CORPUS_TYPES = {
 }
 
 
-def main(corpus_path, corpus_type, out_path, dictionary_path,
-         dictionary_out_path):
-    if corpus_type != 'wiki' and (dictionary_path is not None
-                                  or dictionary_out_path is not None):
-        raise ValueError("Dictionary loading/saving only supported for "
-                         "'wiki' corpus type")
-
-    kwargs = {}
-    if corpus_type == 'wiki':
-        if dictionary_path is not None:
-            kwargs['dictionary'] = Dictionary.load(dictionary_path)
-        elif dictionary_out_path is not None:
-            kwargs['dictionary_save_path'] = dictionary_out_path
-
-    logging.debug('Building corpus')
-    corpus = CORPUS_TYPES[corpus_type](corpus_path, **kwargs)
-    documents = corpus.get_texts()
-
-    logging.debug('Now beginning VSM construction with Word2Vec')
-
-    model = Word2Vec(documents, window=WINDOW_SIZE,
-                     min_count=MINIMUM_TOKEN_COUNT, workers=4)
-    model.save(out_path)
-
-
-if __name__ == '__main__':
+def parse_args():
     parser = argparse.ArgumentParser(
         description='Build a vector-space model from a text corpus.')
 
@@ -59,6 +30,13 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--type', choices=CORPUS_TYPES.keys(),
                         help='Format of the given corpus',
                         default='plain')
+    parser.add_argument('-w', '--window-size', type=int,
+                        help='Word context window size',
+                        default=DEFAULT_WINDOW_SIZE)
+    parser.add_argument('-m', '--minimum-token-count', type=int,
+                        default=DEFAULT_MINIMUM_TOKEN_COUNT,
+                        help=('Drop tokens which appear fewer times '
+                              'than this threshold in the corpus'))
 
     dictionary_opts = parser.add_mutually_exclusive_group()
     dictionary_opts.add_argument('-d', '--dictionary-path',
@@ -70,10 +48,37 @@ if __name__ == '__main__':
 
     parser.add_argument('-v', '--verbose', action='store_true')
 
-    arguments = parser.parse_args()
+    return parser.parse_args()
+
+
+def main(args):
+    if args.corpus_type != 'wiki' and (args.dictionary_path is not None
+                                       or args.dictionary_out_path is not None):
+        raise ValueError("Dictionary loading/saving only supported for "
+                         "'wiki' corpus type")
+
+    kwargs = {}
+    if args.corpus_type == 'wiki':
+        if args.dictionary_path is not None:
+            kwargs['dictionary'] = Dictionary.load(args.dictionary_path)
+        elif args.dictionary_out_path is not None:
+            kwargs['dictionary_save_path'] = args.dictionary_out_path
+
+    logging.debug('Building corpus')
+    corpus = CORPUS_TYPES[args.corpus_type](args.corpus_path, **kwargs)
+    documents = corpus.get_texts()
+
+    logging.debug('Now beginning VSM construction with Word2Vec')
+
+    model = Word2Vec(documents, workers=4, window=args.window_size,
+                     min_count=args.minimum_token_count)
+    model.save(args.out_path)
+
+
+if __name__ == '__main__':
+    arguments = parse_args()
 
     if arguments.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    main(arguments.corpus_path, arguments.type, arguments.out_path,
-         arguments.dictionary_path, arguments.dictionary_out_path)
+    main(arguments)
