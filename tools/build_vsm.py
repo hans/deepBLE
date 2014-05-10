@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument('corpus_path', help='Path to a text corpus')
     parser.add_argument('out_path',
                         help='Path to which to save the generated VSM')
-    parser.add_argument('-t', '--type', choices=CORPUS_TYPES.keys(),
+    parser.add_argument('-t', '--corpus-type', choices=CORPUS_TYPES.keys(),
                         help='Format of the given corpus',
                         default='plain')
     parser.add_argument('-w', '--window-size', type=int,
