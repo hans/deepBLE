@@ -12,6 +12,7 @@ from corpora.wiki import WikiSentenceCorpus
 
 DEFAULT_WINDOW_SIZE = 10
 DEFAULT_MINIMUM_TOKEN_COUNT = 200
+DEFAULT_VECTOR_DIMENSIONS = 100
 
 
 CORPUS_TYPES = {
@@ -30,13 +31,20 @@ def parse_args():
     parser.add_argument('-t', '--corpus-type', choices=CORPUS_TYPES.keys(),
                         help='Format of the given corpus',
                         default='plain')
-    parser.add_argument('-w', '--window-size', type=int,
-                        help='Word context window size',
-                        default=DEFAULT_WINDOW_SIZE)
-    parser.add_argument('-m', '--minimum-token-count', type=int,
-                        default=DEFAULT_MINIMUM_TOKEN_COUNT,
-                        help=('Drop tokens which appear fewer times '
-                              'than this threshold in the corpus'))
+
+    word2vec_opts = parser.add_argument_group('Word2Vec options')
+    word2vec_opts.add_argument('-w', '--window-size', type=int,
+                               help='Word context window size',
+                               default=DEFAULT_WINDOW_SIZE)
+    word2vec_opts.add_argument('-m', '--minimum-token-count', type=int,
+                               default=DEFAULT_MINIMUM_TOKEN_COUNT,
+                               help=('Drop tokens which appear fewer '
+                                     'times than this threshold in the '
+                                     'corpus'))
+    word2vec_opts.add_argument('-s', '--vector-dimensions', type=int,
+                               default=DEFAULT_VECTOR_DIMENSIONS,
+                               help=('Desired dimensionality of the '
+                                     'vectors produced'))
 
     dictionary_opts = parser.add_mutually_exclusive_group()
     dictionary_opts.add_argument('-d', '--dictionary-path',
@@ -81,7 +89,9 @@ def main(args):
     logging.debug('Now beginning VSM construction with Word2Vec')
 
     model = Word2Vec(documents, workers=4, window=args.window_size,
-                     min_count=args.minimum_token_count)
+                     min_count=args.minimum_token_count,
+                     size=args.vector_dimensions)
+
     model.save(args.out_path)
 
 
