@@ -132,7 +132,7 @@ class WikiSentenceCorpus(WikiCorpus):
                             yield sentence
 
                         if self.sentences_out is not None:
-                            self.sentences_out.write(sentence)
+                            self.sentences_out.write(' '.join(sentence))
                             self.sentences_out.write('\n')
 
         pool.terminate()
