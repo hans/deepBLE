@@ -46,23 +46,33 @@ def parse_args():
                                  help=('Path to which a computed '
                                        'dictionary should be saved.'))
 
+    parser.add_argument('--processed-corpus-save-path',
+                        help=('Path to which to save the processed '
+                              'corpus file (can later be reused)'))
+
     parser.add_argument('-v', '--verbose', action='store_true')
 
     return parser.parse_args()
 
 
 def main(args):
-    if args.corpus_type != 'wiki' and (args.dictionary_path is not None
-                                       or args.dictionary_out_path is not None):
-        raise ValueError("Dictionary loading/saving only supported for "
-                         "'wiki' corpus type")
+    if args.corpus_type != 'wiki':
+        if args.dictionary_out_path is not None:
+            raise ValueError("Dictionary loading/saving only supported "
+                             "for 'wiki' corpus type")
+        elif args.processed_corpus_save_path is not None:
+            raise ValueError("Processed corpus saving only supported "
+                             "for 'wiki' corpus type")
 
     kwargs = {}
+    if args.dictionary_path is not None:
+        kwargs['dictionary'] = Dictionary.load(args.dictionary_path)
+
     if args.corpus_type == 'wiki':
-        if args.dictionary_path is not None:
-            kwargs['dictionary'] = Dictionary.load(args.dictionary_path)
-        elif args.dictionary_out_path is not None:
+        if args.dictionary_out_path is not None:
             kwargs['dictionary_save_path'] = args.dictionary_out_path
+        if args.processed_corpus_save_path is not None:
+            kwargs['sentences_save_path'] = args.processed_corpus_save_path
 
     logging.debug('Building corpus')
     corpus = CORPUS_TYPES[args.corpus_type](args.corpus_path, **kwargs)
