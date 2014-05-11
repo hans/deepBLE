@@ -3,10 +3,10 @@ from codecs import open
 import logging
 import re
 
-from gensim.corpora import TextCorpus
 from gensim.corpora.dictionary import Dictionary
 from gensim.models import Word2Vec
 
+from corpora.text import TextCorpus
 from corpora.wiki import WikiSentenceCorpus
 
 
