@@ -21,15 +21,32 @@ class Word2Vec(gensim.models.Word2Vec):
         super(Word2Vec, self).__init__(**kwargs)
 
     def build_vocab(self, sentences):
-        # Attempt to use loaded vocab first, then default to expensive
-        # way..
-        if self.loaded_vocab is not None:
-            self.vocab = self.loaded_vocab
-
-            self.create_binary_tree()
-            self.reset_weights()
-        else:
+        # Default to expensive way if we don't have a vocab loaded from file
+        if self.loaded_vocab is None:
             super(Word2Vec, self).build_vocab(sentences)
+            return
+
+        self.vocab = self.loaded_vocab
+        self.index2word = []
+
+        to_delete = []
+
+        # Start trimming the vocab by class `min_count` parameter, and
+        # update `index2word` as we go
+        i = 0
+        for word, vocab_item in self.vocab.iteritems():
+            if vocab_item.count >= self.min_count:
+                vocab_item.index = i
+                self.index2word.append(word)
+                i += 1
+            else:
+                to_delete.append(word)
+
+        for word in to_delete:
+            del self.vocab[word]
+
+        self.create_binary_tree()
+        self.reset_weights()
 
     def save_vocab(self, vocab_path):
         """Save the built vocabulary to the given path.
