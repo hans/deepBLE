@@ -2,10 +2,10 @@ import argparse
 import logging
 
 from gensim.corpora.dictionary import Dictionary
-from gensim.models import Word2Vec
 
 from vsm.corpora.text import TextCorpus
 from vsm.corpora.wiki import WikiSentenceCorpus
+from vsm.word2vec import Word2Vec
 
 
 DEFAULT_WINDOW_SIZE = 10
@@ -52,6 +52,16 @@ def parse_args():
                                  help=('Path to which a computed '
                                        'dictionary should be saved.'))
 
+    # TODO difference between dictionary and vocab? Do we need both?
+    vocab_opts = parser.add_mutually_exclusive_group()
+    vocab_opts.add_argument('--vocab-path',
+                            help=('Path to a pre-built Word2Vec '
+                                  'vocabulary corresponding to this '
+                                  'corpus'))
+    vocab_opts.add_argument('--vocab-out-path',
+                            help=('Path to which a computed Word2Vec '
+                                  'vocabulary should be saved'))
+
     parser.add_argument('--processed-corpus-save-path',
                         help=('Path to which to save the processed '
                               'corpus file (can later be reused)'))
@@ -86,11 +96,15 @@ def main(args):
 
     logging.debug('Now beginning VSM construction with Word2Vec')
 
-    model = Word2Vec(documents, workers=4, window=args.window_size,
+    model = Word2Vec(sentences=documents, vocab_path=args.vocab_path, workers=4,
+                     window=args.window_size,
                      min_count=args.minimum_token_count,
                      size=args.vector_dimensions)
 
     model.save(args.out_path)
+
+    if args.vocab_out_path is not None:
+        model.save_vocab(args.vocab_out_path)
 
 
 if __name__ == '__main__':
