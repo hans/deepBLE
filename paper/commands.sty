@@ -1,0 +1,100 @@
+% A place to put commands that may be handy in other papers later on.
+% Stolen from https://github.com/utcompling/sample-acl-2014
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Commands for comments (especially useful for coauthoring)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%\newcommand{\metatext}[2]{}
+ \newcommand{\metatext}[2]
+   {\vspace{2mm}\noindent 
+     \textbf{#1.}\hspace{2mm} \textit{#2}\vspace{2mm}}
+
+% add marked comments
+\newcommand{\tba}[1]{\metatext{To be added}{#1}}
+\newcommand{\junk}[1]{}
+\newcommand{\padd}[1]{\metatext{Please add}{#1}}
+\newcommand{\fixme}[1]{\metatext{FIXME}{#1}}
+
+%\newcommand{\commentfn}[1]{}
+\newcommand{\commentfn}[2]{**\footnote{\textbf{#1}: #2}**}
+\newcommand{\jfn}[1]{\commentfn{Jason}{#1}}
+\newcommand{\bfn}[1]{\commentfn{Ben}{#1}}
+\newcommand{\efn}[1]{\commentfn{Erik}{#1}}
+
+%\newcommand{\weenote}[1]{}
+\newcommand{\weenote}[1]{\textbf{**#1**}}
+\newcommand{\bull}{\weenote{BS}}
+\newcommand{\vague}{\weenote{VAGUE}}
+\newcommand{\irr}{\weenote{IRRELEVANT}}
+\newcommand{\wordy}{\weenote{WORDY}}
+\newcommand{\unnec}{\weenote{UNNECESSARY}}
+\newcommand{\refs}{\weenote{REFS}}
+\newcommand{\unclear}{\weenote{UNCLEAR}}
+\newcommand{\needcite}[1]{[\textbf{NEEDCITE}: \textit{#1]}}
+
+
+\newcommand{\affilA}{\textsuperscript{\textdagger}}
+\newcommand{\affilB}{\textsuperscript{\ddag}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% References that display appropriately depending on what one is
+%% referring to. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% cite in text
+%\newcommand{\citet}[1]{\citea{#1} \shortcite{#1}}
+%\newcommand{\citet}[1]{\newcite{#1}}
+
+\newcommand{\labex}[1]{\label{ex:#1}}
+
+% modular references
+\newcommand{\eref}[2][]{(\ref{ex:#2}#1)} %examples
+\newcommand{\cref}[1]{Chapter~\ref{chapter:#1}} % chapters
+\newcommand{\dref}[1]{Definition~\ref{def:#1}} % definitions
+\newcommand{\tref}[1]{Table~\ref{tab:#1}} % tables
+\newcommand{\fref}[1]{Figure~\ref{fig:#1}} % figures
+\newcommand{\sref}[1]{\S\ref{sec:#1}} %sections 
+
+
+%% space-savers
+
+\newenvironment{enumeratesquish}{\begin{list}{\addtocounter{enumi}{1}\arabic{enumi}.}{\setlength{\itemsep}{-0.5em}\setlength{\leftmargin}{1em}\addtolength{\leftmargin}{\labelsep}}}{\end{list}}
+
+\newenvironment{itemizesquish}{\begin{list}{\labelitemi}{\setlength{\itemsep}{-0.25em}\setlength{\labelwidth}{0.5em}\setlength{\leftmargin}{\labelwidth}\addtolength{\leftmargin}{\labelsep}}}{\end{list}}
+
+%% macros for this paper
+
+\newcommand{\dataset}[1]{\mbox{\textsc{#1}}}
+\newcommand{\model}[1]{\mbox{\textsc{#1}}}
+
+%\newcommand{\utgeo}{\textsc{UtGeo}}
+\newcommand{\geowiki}{\dataset{GeoWiki}}
+\newcommand{\geotext}{\dataset{GeoText}}
+\newcommand{\utgeo}{\dataset{UTGeo2011}}
+\newcommand{\cophir}{\dataset{CoPhIR}}
+\newcommand{\utgeolarge}{\dataset{UTGeo2011-Large}}
+\newcommand{\utgeosmall}{\dataset{UTGeo2011-Small}}
+\newcommand{\bsize}{BS}
+\newcommand{\kd}{\textit{k}-d}
+\newcommand{\mediansplit}{\textsc{Fried. }}
+\newcommand{\mediansplitlong}{\textsc{Friedman}}
+\newcommand{\midpointsplit}{\textsc{Midpt. }}
+\newcommand{\midpointsplitlong}{\textsc{Midpoint}}
+
+%% configurations:
+\newcommand{\wandb}{W\&B}
+\newcommand{\smvz}{SMvZ}
+\newcommand{\roller}{Roller2012}
+\newcommand{\om}{O\&M2013}
+\newcommand{\unifcentroid}{\model{UnifCentroid}}
+\newcommand{\kdcentroid}{\model{KdCentroid}}
+\newcommand{\combined}{\model{UnifKdCentroid}}
+\newcommand{\randbaseline}{\model{Random}}
+\newcommand{\commonbaseline}{\model{MostCommonCell}}
+
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\dgr}{\ensuremath{^\circ}}
+\newcommand{\ecount}{\ensuremath{\#}}

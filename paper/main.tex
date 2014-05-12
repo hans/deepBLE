@@ -1,0 +1,106 @@
+%
+% File acl2014.tex
+%
+% Contact: koller@ling.uni-potsdam.de, yusuke@nii.ac.jp
+%%
+%% Based on the style files for ACL-2013, which were, in turn,
+%% Based on the style files for ACL-2012, which were, in turn,
+%% based on the style files for ACL-2011, which were, in turn, 
+%% based on the style files for ACL-2010, which were, in turn, 
+%% based on the style files for ACL-IJCNLP-2009, which were, in turn,
+%% based on the style files for EACL-2009 and IJCNLP-2008...
+
+%% Based on the style files for EACL 2006 by 
+%%e.agirre@ehu.es or Sergi.Balari@uab.es
+%% and that of ACL 08 by Joakim Nivre and Noah Smith
+
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{acl2014}
+\usepackage{times}
+\usepackage{microtype}
+\usepackage{url}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{paralist} % inline lists
+\usepackage{commands}
+
+% smart quotes
+\usepackage[autostyle, english=american]{csquotes}
+\MakeOuterQuote{"}
+
+%\setlength\titlebox{5cm}
+
+% You can expand the titlebox if you need extra space
+% to show all the authors. Please do not make the titlebox
+% smaller than 5cm (the original size); we will check this
+% in the camera-ready version and ask you to change it back.
+
+
+\title{Deep Neural Models for Bilingual Lexicon Extraction}
+
+\author{Jon Gauthier \\
+  Symbolic Systems Program \\
+  Stanford University \\
+  Stanford, CA 94305 \\
+  {\tt jgauthie@stanford.edu} \\\And
+  Arthur Tsang \\
+  Department of Computer Science \\
+  Stanford University \\
+  Stanford, CA 94305 \\
+  {\tt atsang2@stanford.edu} \\}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  We present a new method for producing bilingual lexicons from very
+  non-parallel corpora. In contrast with previous approaches, our method
+  separates the steps of \begin{inparaenum}[(1)]
+    \item constructing distributed word representations from monolingual
+      corpora, and
+    \item building a mapping between these representations.
+  \end{inparaenum}
+  
+  % TODO
+  We demonstrate that a deep neural model can effectively learn a translational
+  mapping between two monolingual vector spaces for the purposes of bilingual
+  lexicon extraction. We evaluate the performance of this model relative to X
+  and Y.
+\end{abstract}
+
+\section{Introduction}
+
+In the task of bilingual lexicon extraction (BLE), we accept as input some pair
+of corpora in different languages---perhaps parallel or perhaps not---and learn
+associations of translational equivalence between one language (a "source
+language") and the other (a "target language").
+
+Bilingual lexicon extraction is obviously of most utility when applied to
+under-resourced language pairs which do not already benefit from a surplus of
+lexicon materials. These same language pairs, lacking resources as simple as
+translation dictionaries, also lack sufficient aligned text for training
+BLE models. For this reason, most recent work on this task focuses on
+minimally supervised approaches which do not require parallel corpora
+\cite{rapp1995,peirsman2010}.
+
+\newcite{rapp1995} suggested that there is "a correlation between the patterns
+of word co-occurrences in different languages." In line with this hypothesis,
+recent work has determined the likelihood of two words as translations of one
+another by comparing the translations of the contexts in which they appear. The
+standard approach is to manually\unclear construct a "bilingual vector space" which
+contains distributed word representations of words in both the source and target
+language \cite{fung1998,peirsman2010,vulic2013}.
+
+\section*{Acknowledgments}
+
+The acknowledgments should go immediately before the references.  Do
+not number the acknowledgments section. Do not include this section
+when submitting your paper for review.
+
+\bibliographystyle{acl}
+\bibliography{bibliography}
+
+\end{document}
