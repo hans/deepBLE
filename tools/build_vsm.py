@@ -1,13 +1,11 @@
 import argparse
-from codecs import open
 import logging
-import re
 
 from gensim.corpora.dictionary import Dictionary
 from gensim.models import Word2Vec
 
-from corpora.text import TextCorpus
-from corpora.wiki import WikiSentenceCorpus
+from vsm.corpora.text import TextCorpus
+from vsm.corpora.wiki import WikiSentenceCorpus
 
 
 DEFAULT_WINDOW_SIZE = 10
