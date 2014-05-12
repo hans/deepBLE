@@ -1,6 +1,11 @@
 .DS_Store
 *.pyc
 
+# data
+data/corpus/*
+data/model/*
+data/vsm/*
+
 # virtualenv
 .Python
 bin
