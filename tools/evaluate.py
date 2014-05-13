@@ -6,6 +6,7 @@ import argparse
 import codecs
 from datetime import datetime
 import logging
+import multiprocessing
 from multiprocessing.pool import Pool
 import random
 import sys
@@ -76,7 +77,7 @@ def evaluate_model(model, data, do_train=True):
     global MODEL
     MODEL = model
 
-    pool = Pool(4)
+    pool = Pool(multiprocessing.cpu_count())
     scores = [x for x in pool.imap_unordered(score, test_pairs)
               if x is not None]
     logging.debug("Scores: %r" % scores)
