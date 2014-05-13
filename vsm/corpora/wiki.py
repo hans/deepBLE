@@ -69,15 +69,14 @@ class WikiSentenceCorpus(WikiCorpus):
         dictionary_save_path = kwargs.pop('dictionary_save_path', None)
         sentences_save_path = kwargs.pop('sentences_save_path', None)
 
+        self.sentences_out = None
+        if sentences_save_path is not None:
+            self.sentences_out = open(sentences_save_path, 'w')
+
         super(WikiSentenceCorpus, self).__init__(*args, **kwargs)
 
         if dictionary_save_path is not None:
             self.dictionary.save(dictionary_save_path)
-
-        if sentences_save_path is not None:
-            self.sentences_out = open(sentences_save_path, 'w')
-        else:
-            self.sentences_out = None
 
     def open_corpus_file(self):
         _, extension = os.path.splitext(self.fname)
