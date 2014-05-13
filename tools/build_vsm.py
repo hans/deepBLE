@@ -1,5 +1,6 @@
 import argparse
 import logging
+import multiprocessing
 
 from gensim.corpora.dictionary import Dictionary
 
@@ -96,10 +97,11 @@ def main(args):
 
     logging.debug('Now beginning VSM construction with Word2Vec')
 
-    model = Word2Vec(sentences=documents, vocab_path=args.vocab_path, workers=4,
+    model = Word2Vec(sentences=documents, vocab_path=args.vocab_path,
                      window=args.window_size,
                      min_count=args.minimum_token_count,
-                     size=args.vector_dimensions)
+                     size=args.vector_dimensions,
+                     workers=multiprocessing.cpu_count())
 
     model.save(args.out_path)
 
