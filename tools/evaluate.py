@@ -114,6 +114,8 @@ def parse_args():
                         type=parse_cmdline_kwarg,
                         help=('Float or integer keyword arguments to '
                               'pass to the model (of the form )'))
+    parser.add_argument('--test-on-train', default=False,
+                        help='Test on the same data used to train')
 
     arguments = parser.parse_args()
 
@@ -156,7 +158,11 @@ def main(arguments):
                           "saved files")
             sys.exit(1)
     else:
-        training_pairs, test_pairs = train_test_split(data)
+        if arguments.test_on_train:
+            training_pairs = test_pairs
+        else:
+            training_pairs, test_pairs = train_test_split(data)
+
         model.train(training_pairs)
 
     # Now perform evaluation
