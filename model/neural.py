@@ -25,7 +25,7 @@ class NeuralTranslationModel(TranslationModel):
 
     def __init__(self, source_vsm, target_vsm, bias=BIAS,
                  hidden_layer_size=HIDDEN_LAYER_SIZE,
-                 learning_rate=LEARNING_RATE):
+                 learning_rate=LEARNING_RATE, verbose=False):
         """TODO document"""
 
         super(NeuralTranslationModel, self).__init__(source_vsm, target_vsm)
@@ -35,6 +35,7 @@ class NeuralTranslationModel(TranslationModel):
         self.bias = bias
         self.hidden_layer_size = hidden_layer_size
         self.learning_rate = learning_rate
+        self.verbose = verbose
 
     def train_vecs(self, source_vecs, target_vecs):
         input_size = self.source_vsm.layer1_size
@@ -48,7 +49,7 @@ class NeuralTranslationModel(TranslationModel):
 
         trainer = BackpropTrainer(self.network, dataset,
                                   learningrate=self.learning_rate,
-                                  verbose=True)
+                                  verbose=self.verbose)
         trainer.trainUntilConvergence()
 
     def load(self, path):
