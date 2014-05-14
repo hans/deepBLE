@@ -44,7 +44,7 @@ class NeuralTranslationModel(TranslationModel):
 
         dataset = SupervisedDataSet(input_size, output_size)
         dataset.setField('input', np.mat(source_vecs))
-        dataset.setField('output', np.mat(target_vecs))
+        dataset.setField('target', np.mat(target_vecs))
 
         trainer = BackpropTrainer(self.network, dataset,
                                   learningrate=self.learning_rate,
