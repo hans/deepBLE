@@ -5,6 +5,7 @@ data.
 import argparse
 import codecs
 from datetime import datetime
+import json
 import logging
 import multiprocessing
 from multiprocessing.pool import Pool
@@ -50,35 +51,37 @@ def score((source_word, target_word), threshold=20):
     return score
 
 
-def evaluate_model(model, data, do_train=True):
-    """Evaluate the performance of a translation model. Returns the mean
-    and standard deviation of scores among data tuples used for testing
-    (where a score ranges between 0 (worst) and 1 (perfect
-    translation))."""
+def save_model(model, originating_arguments):
+    """Save a newly trained model along with information about the
+    arguments that generated it.."""
 
-    if do_train:
-        training_pairs, test_pairs = train_test_split(data)
-        model.train(training_pairs)
+    now = datetime.now()
+    model_name = ("saved_models/model-{}-{}-{:02d}{:02d}"
+                  .format(model.__class__.__name__, now.date().isoformat(),
+                          now.hour, now.minute))
 
-        # We just trained a model -- save it somewhere
-        now = datetime.now()
-        model_name = ("saved_models/model-{}-{}-{:02d}{:02d}"
-                      .format(model.__class__.__name__, now.date().isoformat(),
-                              now.hour, now.minute))
-
-        try:
-            model.save(model_name)
-        except NotImplementedError:
-            logging.info("Model does not support saving to files; "
-                         "skipping save")
+    try:
+        model.save(model_name)
+    except NotImplementedError:
+        logging.info("Model does not support saving to files; "
+                     "skipping save")
     else:
-        test_pairs = data
+        # Save argument information as well
+        with open('{}_arguments.json', 'w') as arguments_f:
+            json.dump(originating_arguments, arguments_f)
+
+
+def evaluate_model(model, test_data):
+    """Evaluate the performance of a trained translation model. Returns
+    the mean and standard deviation of scores among data tuples used for
+    testing (where a score ranges between 0 (worst) and 1 (perfect
+    translation))."""
 
     global MODEL
     MODEL = model
 
     pool = Pool(multiprocessing.cpu_count())
-    scores = [x for x in pool.imap_unordered(score, test_pairs)
+    scores = [x for x in pool.imap_unordered(score, test_data)
               if x is not None]
     logging.debug("Scores: %r" % scores)
 
@@ -127,13 +130,7 @@ MODEL_MAPPING = {
     'neural': model.NeuralTranslationModel,
 }
 
-if __name__ == '__main__':
-    logging.getLogger().setLevel(logging.DEBUG)
-    # logging.getLogger().setFormatter(
-    #     logging.Formatter('%(asctime)s : %(levelname)s : %(message)s'))
-
-    arguments = parse_args()
-
+def main(arguments):
     vsm_source = Word2Vec.load(arguments.vsm_source)
     vsm_target = Word2Vec.load(arguments.vsm_target)
 
@@ -141,6 +138,13 @@ if __name__ == '__main__':
     model_class = MODEL_MAPPING[arguments.model]
     model = model_class(vsm_source, vsm_target, **arguments.model_arguments)
 
+    # Load seed data
+    with codecs.open(arguments.data, 'r', encoding='utf-8') as data_file:
+        data = [tuple(line.strip().split('\t')) for line in data_file]
+    # By default, use all the data as test data
+    test_pairs = data
+
+    # Attempt to load model from file
     if arguments.model_file is not None:
         logging.debug("Loading model from file '{}'"
                       .format(arguments.model_file))
@@ -151,13 +155,20 @@ if __name__ == '__main__':
             logging.error("Requested model does not support loading from "
                           "saved files")
             sys.exit(1)
+    else:
+        training_pairs, test_pairs = train_test_split(data)
+        model.train(training_pairs)
 
-    # Load seed data
-    with codecs.open(arguments.data, 'r', encoding='utf-8') as data_file:
-        data = [tuple(line.strip().split('\t')) for line in data_file]
-
-    # Do we need to train the model?
-    do_train = arguments.model_file is None
-
+    # Now perform evaluation
+    #
     # TODO print nicely
-    print evaluate_model(model, data, do_train)
+    print evaluate_model(model, data)
+
+
+if __name__ == '__main__':
+    logging.getLogger().setLevel(logging.DEBUG)
+    # logging.getLogger().setFormatter(
+    #     logging.Formatter('%(asctime)s : %(levelname)s : %(message)s'))
+
+    arguments = parse_args()
+    main(arguments)
