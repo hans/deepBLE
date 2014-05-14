@@ -16,6 +16,7 @@ from gensim.models import Word2Vec
 from numpy import mean, std
 
 import model
+from model.runner import evaluate_model, score
 
 
 def train_test_split(data, training_pct=80):
@@ -24,31 +25,6 @@ def train_test_split(data, training_pct=80):
     random.shuffle(data)
     split = int(len(data) * (training_pct / 100.0))
     return data[:split], data[split:]
-
-
-MODEL = None
-def score((source_word, target_word), threshold=20):
-    """Test the given model on the given `(source_word, target_word)`
-    pair and return a score describing its performance.
-
-    The score is bounded between 0 (worst) and 1 (perfect
-    translation)."""
-
-    try:
-        predictions = MODEL.translate(source_word, n=threshold)
-    except ValueError:
-        # Translation error
-        logging.exception("Translation error")
-        return None
-
-    try:
-        rank = predictions.index(target_word)
-    except ValueError:
-        score = 0
-    else:
-        score = 1.0 / (rank + 1)
-
-    return score
 
 
 def save_model(model, originating_arguments):
@@ -69,23 +45,6 @@ def save_model(model, originating_arguments):
         # Save argument information as well
         with open('{}_arguments.json', 'w') as arguments_f:
             json.dump(originating_arguments, arguments_f)
-
-
-def evaluate_model(model, test_data):
-    """Evaluate the performance of a trained translation model. Returns
-    the mean and standard deviation of scores among data tuples used for
-    testing (where a score ranges between 0 (worst) and 1 (perfect
-    translation))."""
-
-    global MODEL
-    MODEL = model
-
-    pool = Pool(multiprocessing.cpu_count())
-    scores = [x for x in pool.imap_unordered(score, test_data)
-              if x is not None]
-    logging.debug("Scores: %r" % scores)
-
-    return mean(scores), std(scores)
 
 
 def parse_cmdline_kwarg(kwarg):
@@ -168,7 +127,8 @@ def main(arguments):
     # Now perform evaluation
     #
     # TODO print nicely
-    print evaluate_model(model, data)
+    scores = evaluate_model(model, data)
+    print mean(scores), std(scores)
 
 
 if __name__ == '__main__':
