@@ -15,7 +15,8 @@ def test_3words():
     model = NeuralTranslationModel(
         load_vsm_fixture('three-words/vsm-a-window5-min0-dim5'),
         load_vsm_fixture('three-words/vsm-b-window5-min0-dim5'),
-        hidden_layer_size=5, learning_rate=0.00001)
+        hidden_layer_size=5, learning_rate=0.01)
     model.train(data)
 
+    # TODO how to assert good enough performance here? Maybe train an ensemble?
     print evaluate_model(model, data)
