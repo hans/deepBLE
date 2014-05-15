@@ -3,6 +3,28 @@ import logging
 from scipy.spatial import distance
 
 
+def get_word_vector(vsm, word, alternate_encodings=None):
+    """Retrieve the word vector for a given Unicode-encoded word from
+    a VSM.
+
+    Attempts to abstract away some encoding ugliness."""
+
+    if alternate_encodings is None:
+        alternate_encodings = 'latin-1'
+
+    try:
+        return vsm[word]
+    except KeyError:
+        for encoding in alternate_encodings:
+            try:
+                return vsm[word.encode(encoding)]
+            except UnicodeEncodeError:
+                pass
+
+        # Still here?
+        return None
+
+
 class TranslationModel(object):
     """A model which uses paired vector-space language models to translate
     words between two languages.
@@ -20,15 +42,13 @@ class TranslationModel(object):
 
         source_vecs, target_vecs = [], []
         for source_word, target_word in seeds:
-            try:
-                source = self.source_vsm[source_word]
-            except KeyError:
+            source = get_word_vector(self.source_vsm, source_word)
+            if source is None:
                 logging.warn(u'Source VSM missing word {}'.format(source_word))
                 continue
 
-            try:
-                target = self.target_vsm[target_word]
-            except KeyError:
+            target = get_word_vector(self.target_vsm, target_word)
+            if target is None:
                 logging.warn(u'Target VSM missing word {}'.format(target_word))
                 continue
 
