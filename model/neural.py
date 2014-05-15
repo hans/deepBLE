@@ -1,11 +1,11 @@
 import logging
+import pickle
 
 import numpy as np
-from pybrain.datasets import SupervisedDataSet
-from pybrain.supervised.trainers import BackpropTrainer
-from pybrain.tools.shortcuts import buildNetwork
-from pybrain.tools.xml.networkreader import NetworkReader
-from pybrain.tools.xml.networkwriter import NetworkWriter
+from pylearn2.models import mlp
+from pylearn2.training_algorithms import sgd
+from pylearn2.termination_criteria import MonitorBased
+from pylearn2.datasets.dense_design_matrix import DenseDesignMatrix
 
 from model.core import TranslationModel
 
@@ -23,9 +23,12 @@ class NeuralTranslationModel(TranslationModel):
 
     LEARNING_RATE = 0.01
 
+    BATCH_SIZE = 10
+
     def __init__(self, source_vsm, target_vsm, bias=BIAS,
                  hidden_layer_size=HIDDEN_LAYER_SIZE,
-                 learning_rate=LEARNING_RATE, verbose=False):
+                 learning_rate=LEARNING_RATE, batch_size=BATCH_SIZE,
+                 verbose=False):
         """TODO document"""
 
         super(NeuralTranslationModel, self).__init__(source_vsm, target_vsm)
@@ -35,29 +38,53 @@ class NeuralTranslationModel(TranslationModel):
         self.bias = bias
         self.hidden_layer_size = hidden_layer_size
         self.learning_rate = learning_rate
+        self.batch_size = batch_size
         self.verbose = verbose
 
+    def foo(self, t):
+        print t.model.monitor.channels
+
     def train_vecs(self, source_vecs, target_vecs):
+        # Build dataset
+        X = np.mat(source_vecs)
+        Y = np.mat(target_vecs)
+        dataset = DenseDesignMatrix(X=X, y=Y)
+
+        # Determine visible layer dimensions
         input_size = self.source_vsm.layer1_size
         output_size = self.target_vsm.layer1_size
-        self.network = buildNetwork(input_size, self.hidden_layer_size,
-                                    output_size, bias=self.bias, fast=True)
 
-        dataset = SupervisedDataSet(input_size, output_size)
-        dataset.setField('input', np.mat(source_vecs))
-        dataset.setField('target', np.mat(target_vecs))
+        # Hidden layer with sigmoid activation function
+        hidden_layer = mlp.Sigmoid(layer_name='hidden', irange=.1, init_bias=1.,
+                                   use_bias=self.bias,
+                                   dim=self.hidden_layer_size)
 
-        trainer = BackpropTrainer(self.network, dataset,
-                                  learningrate=self.learning_rate,
-                                  verbose=self.verbose)
-        trainer.trainUntilConvergence()
+        # Output layer with linear activation function
+        output_layer = mlp.Linear(output_size, 'output', irange=.1,
+                                  use_bias=self.bias)
+
+        layers = [hidden_layer, output_layer]
+
+        # Initialize SGD trainer
+        trainer = sgd.SGD(learning_rate=self.learning_rate,
+                          batch_size=self.batch_size,
+                          termination_criterion=MonitorBased(),
+                          update_callbacks=self.foo)
+
+        # Now construct neural network
+        self.network = mlp.MLP(layers, nvis=input_size)
+        trainer.setup(self.network, dataset)
+
+        trainer.train()
 
     def load(self, path):
-        self.network = NetworkReader.readFrom(path)
+        with open(path, 'r') as model_f:
+            self.network = pickle.load(model_f)
 
     def save(self, path):
         logging.info("Saving neural network model to '{}'".format(path))
-        NetworkWriter.writeToFile(self.network, path)
+        with open(path, 'w') as model_f:
+            pickle.dump(self.network, model_f)
 
     def translate_vec(self, source_vec):
         return self.network.activate(source_vec)
