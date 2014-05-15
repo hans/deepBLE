@@ -52,6 +52,6 @@ def evaluate_model(model, test_data):
     # scores = [x for x in pool.imap_unordered(score, test_data)
     #           if x is not None]
     scores = [score(x) for x in test_data]
-    scores = [score for score in scores if score is not None]
+    scores = [x for x in scores if x is not None]
 
     return scores
