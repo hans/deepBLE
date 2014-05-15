@@ -11,5 +11,6 @@ data/vsm/*
 bin
 include
 lib
+local
 man
 share
