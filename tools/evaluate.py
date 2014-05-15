@@ -123,7 +123,7 @@ def main(arguments):
             training_pairs, test_pairs = train_test_split(data)
 
         model.train(training_pairs)
-        save_model(model, arguments)
+        save_model(model, vars(arguments))
 
     # Now perform evaluation
     #
