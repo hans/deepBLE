@@ -18,8 +18,8 @@ def get_word_vector(vsm, word, alternate_encodings=None):
         for encoding in alternate_encodings:
             try:
                 return vsm[word.encode(encoding)]
-            except UnicodeEncodeError:
-                pass
+            except UnicodeEncodeError: pass
+            except KeyError: pass
 
         # Still here?
         return None
