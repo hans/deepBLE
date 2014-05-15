@@ -1,10 +1,12 @@
 import logging
 import pickle
+from pprint import pprint
 
 import numpy as np
+from pylearn2.costs import mlp as mlp_costs
 from pylearn2.models import mlp
 from pylearn2.training_algorithms import sgd
-from pylearn2.termination_criteria import MonitorBased
+from pylearn2.termination_criteria import EpochCounter, MonitorBased
 from pylearn2.datasets.dense_design_matrix import DenseDesignMatrix
 
 from model.core import TranslationModel
@@ -41,9 +43,6 @@ class NeuralTranslationModel(TranslationModel):
         self.batch_size = batch_size
         self.verbose = verbose
 
-    def foo(self, t):
-        print t.model.monitor.channels
-
     def train_vecs(self, source_vecs, target_vecs):
         # Build dataset
         X = np.mat(source_vecs)
@@ -69,13 +68,20 @@ class NeuralTranslationModel(TranslationModel):
         trainer = sgd.SGD(learning_rate=self.learning_rate,
                           batch_size=self.batch_size,
                           termination_criterion=MonitorBased(),
-                          update_callbacks=self.foo)
+                          monitoring_dataset=dataset)
 
         # Now construct neural network
         self.network = mlp.MLP(layers, nvis=input_size)
         trainer.setup(self.network, dataset)
 
-        trainer.train(dataset=dataset)
+        while True:
+            trainer.train(dataset=dataset)
+
+            self.network.monitor.report_epoch()
+            self.network.monitor()
+
+            if not trainer.continue_learning(self.network):
+                break
 
     def load(self, path):
         with open(path, 'r') as model_f:
