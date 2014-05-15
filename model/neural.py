@@ -8,6 +8,7 @@ from pylearn2.models import mlp
 from pylearn2.training_algorithms import sgd
 from pylearn2.termination_criteria import EpochCounter, MonitorBased
 from pylearn2.datasets.dense_design_matrix import DenseDesignMatrix
+import theano
 
 from model.core import TranslationModel
 
@@ -83,6 +84,10 @@ class NeuralTranslationModel(TranslationModel):
             if not trainer.continue_learning(self.network):
                 break
 
+        X_sym = self.network.get_input_space().make_theano_batch()
+        Y_sym = self.network.fprop(X_sym)
+        self.network_fn = theano.function([X_sym], Y_sym)
+
     def load(self, path):
         with open(path, 'r') as model_f:
             self.network = pickle.load(model_f)
@@ -93,4 +98,4 @@ class NeuralTranslationModel(TranslationModel):
             pickle.dump(self.network, model_f)
 
     def translate_vec(self, source_vec):
-        return self.network.activate(source_vec)
+        return self.network_fn(np.array([source_vec]))

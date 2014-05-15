@@ -48,8 +48,9 @@ def evaluate_model(model, test_data):
     global MODEL
     MODEL = model
 
-    pool = Pool(multiprocessing.cpu_count())
-    scores = [x for x in pool.imap_unordered(score, test_data)
-              if x is not None]
+    # pool = Pool(multiprocessing.cpu_count())
+    # scores = [x for x in pool.imap_unordered(score, test_data)
+    #           if x is not None]
+    scores = [score(x) for x in test_data]
 
     return scores
