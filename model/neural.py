@@ -75,7 +75,7 @@ class NeuralTranslationModel(TranslationModel):
         self.network = mlp.MLP(layers, nvis=input_size)
         trainer.setup(self.network, dataset)
 
-        trainer.train()
+        trainer.train(dataset=dataset)
 
     def load(self, path):
         with open(path, 'r') as model_f:
