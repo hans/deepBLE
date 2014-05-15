@@ -10,7 +10,7 @@ def get_word_vector(vsm, word, alternate_encodings=None):
     Attempts to abstract away some encoding ugliness."""
 
     if alternate_encodings is None:
-        alternate_encodings = ['latin-1']
+        alternate_encodings = ['utf-8', 'latin-1']
 
     try:
         return vsm[word]
