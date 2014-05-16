@@ -4,6 +4,7 @@ from pprint import pprint
 
 import numpy as np
 from pylearn2.costs import mlp as mlp_costs
+from pylearn2.costs.cost import SumOfCosts
 from pylearn2.models import mlp
 from pylearn2.training_algorithms import sgd
 from pylearn2.termination_criteria import EpochCounter, MonitorBased
@@ -65,14 +66,20 @@ class NeuralTranslationModel(TranslationModel):
 
         layers = [hidden_layer, output_layer]
 
-        # Initialize SGD trainer
-        trainer = sgd.SGD(learning_rate=self.learning_rate,
-                          batch_size=self.batch_size,
-                          termination_criterion=MonitorBased(),
-                          monitoring_dataset=dataset)
-
         # Now construct neural network
         self.network = mlp.MLP(layers, nvis=input_size)
+
+        # Build cost function
+        error_cost = mlp_costs.Default()
+        regularization_cost = mlp_costs.WeightDecay([1., 1.])
+        cost_expr = SumOfCosts([error_cost])# , (.5, regularization_cost)])
+
+        # Initialize SGD trainer
+        trainer = sgd.SGD(cost=cost_expr,
+                          learning_rate=self.learning_rate,
+                          batch_size=self.batch_size,
+                          termination_criterion=MonitorBased(.0000001, N=100),
+                          monitoring_dataset=dataset)
         trainer.setup(self.network, dataset)
 
         while True:
