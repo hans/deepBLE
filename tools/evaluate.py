@@ -43,7 +43,7 @@ def save_model(model, originating_arguments):
                      "skipping save")
     else:
         # Save argument information as well
-        with open('{}_arguments.json', 'w') as arguments_f:
+        with open('{}_arguments.json'.format(model_name), 'w') as arguments_f:
             json.dump(originating_arguments, arguments_f)
 
 
