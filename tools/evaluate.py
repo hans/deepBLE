@@ -128,7 +128,7 @@ def main(arguments):
     # Now perform evaluation
     #
     # TODO print nicely
-    scores = evaluate_model(model, data)
+    scores = evaluate_model(model, test_pairs)
     print mean(scores), std(scores)
 
 
