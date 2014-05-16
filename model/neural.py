@@ -19,13 +19,13 @@ class NeuralTranslationModel(TranslationModel):
     given training examples.
     """
 
-    BIAS = True
+    BIAS = False
     """True if the neural network should include bias units in its input
     and hidden layers."""
 
     HIDDEN_LAYER_SIZE = 1000
 
-    LEARNING_RATE = 0.01
+    LEARNING_RATE = 0.001
 
     BATCH_SIZE = 10
 
