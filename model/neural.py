@@ -91,6 +91,9 @@ class NeuralTranslationModel(TranslationModel):
             if not trainer.continue_learning(self.network):
                 break
 
+        self.make_network_fn()
+
+    def make_network_fn(self):
         X_sym = self.network.get_input_space().make_theano_batch()
         Y_sym = self.network.fprop(X_sym)
         self.network_fn = theano.function([X_sym], Y_sym)
@@ -98,6 +101,7 @@ class NeuralTranslationModel(TranslationModel):
     def load(self, path):
         with open(path, 'r') as model_f:
             self.network = pickle.load(model_f)
+        self.make_network_fn()
 
     def save(self, path):
         logging.info("Saving neural network model to '{}'".format(path))
