@@ -9,6 +9,8 @@ data/vsm/*
 # virtualenv
 .Python
 bin
+build
+core
 include
 lib
 local
