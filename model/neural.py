@@ -29,6 +29,10 @@ class NeuralTranslationModel(TranslationModel):
 
     BATCH_SIZE = 10
 
+    TRAINING_DATA_RATIO = 0.75
+    """Ratio of data input used for training (compared to total data
+    input). Remaining data is used for cross validation."""
+
     def __init__(self, source_vsm, target_vsm, bias=BIAS,
                  hidden_layer_size=HIDDEN_LAYER_SIZE,
                  learning_rate=LEARNING_RATE, batch_size=BATCH_SIZE,
@@ -45,11 +49,21 @@ class NeuralTranslationModel(TranslationModel):
         self.batch_size = batch_size
         self.verbose = verbose
 
+    def build_datasets(self, source_vecs, target_vecs):
+        split = int(len(source_vecs) * self.TRAINING_DATA_RATIO)
+
+        X_train = np.mat(source_vecs[:split])
+        Y_train = np.mat(target_vecs[:split])
+        ds_train = DenseDesignMatrix(X=X_train, y=Y_train)
+
+        X_cv = np.mat(source_vecs[split:])
+        Y_cv = np.mat(target_vecs[split:])
+        ds_cv = DenseDesignMatrix(X=X_cv, y=Y_cv)
+
+        return ds_train, ds_cv
+
     def train_vecs(self, source_vecs, target_vecs):
-        # Build dataset
-        X = np.mat(source_vecs)
-        Y = np.mat(target_vecs)
-        dataset = DenseDesignMatrix(X=X, y=Y)
+        ds_train, ds_cv = self.build_datasets(source_vecs, target_vecs)
 
         # Determine visible layer dimensions
         input_size = self.source_vsm.layer1_size
@@ -79,11 +93,11 @@ class NeuralTranslationModel(TranslationModel):
                           learning_rate=self.learning_rate,
                           batch_size=self.batch_size,
                           termination_criterion=MonitorBased(.0000001, N=100),
-                          monitoring_dataset=dataset)
-        trainer.setup(self.network, dataset)
+                          monitoring_dataset=ds_cv)
+        trainer.setup(self.network, ds_train)
 
         while True:
-            trainer.train(dataset=dataset)
+            trainer.train(dataset=ds_train)
 
             self.network.monitor.report_epoch()
             self.network.monitor()
