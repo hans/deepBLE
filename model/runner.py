@@ -12,8 +12,35 @@ from multiprocessing.pool import Pool
 # processes
 MODEL = None
 
+logger = logging.getLogger(__name__)
 
-def score((source_word, target_word), threshold=20):
+
+def get_translations(source_word, threshold=20):
+    """Fetch the top `threshold` translations for the given
+    source-language word.
+
+    Returns `None` if the given source word is not accounted for by the
+    translation model.
+    """
+
+    try:
+        predictions = MODEL.translate(source_word, n=threshold)
+    except ValueError:
+        # Translation error
+        logging.exception("Translation error")
+        return None
+    else:
+        return predictions
+
+
+def log_translations(source_word, target_word, translations):
+    targets = [u'**{}**'.format(target) if target == source_word else target
+               for target in translations]
+    logging.info(u'Translations of {}: {}'
+                 .format(source_word, ' '.join(targets)))
+
+
+def score(source_word, expected_target_word, translations):
     """Test the given model on the given `(source_word, target_word)`
     pair and return a score describing its performance.
 
@@ -24,14 +51,7 @@ def score((source_word, target_word), threshold=20):
     translation)."""
 
     try:
-        predictions = MODEL.translate(source_word, n=threshold)
-    except ValueError:
-        # Translation error
-        logging.exception("Translation error")
-        return None
-
-    try:
-        rank = predictions.index(target_word)
+        rank = translations.index(expected_target_word)
     except ValueError:
         score = 0
     else:
@@ -51,7 +71,11 @@ def evaluate_model(model, test_data):
     # pool = Pool(multiprocessing.cpu_count())
     # scores = [x for x in pool.imap_unordered(score, test_data)
     #           if x is not None]
-    scores = [score(x) for x in test_data]
-    scores = [x for x in scores if x is not None]
+    for source_word, target_word in test_data:
+        translations = get_translations(source_word)
+        if translations is None:
+            continue
 
-    return scores
+        log_translations(source_word, target_word, translations)
+
+        yield score(source_word, target_word, translations)
