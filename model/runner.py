@@ -37,7 +37,7 @@ def log_translations(source_word, target_word, translations):
     targets = [u'**{}**'.format(target) if target == source_word else target
                for target in translations]
     logging.info(u'Translations of {}: {}'
-                 .format(source_word, ' '.join(targets)))
+                 .format(source_word, u' '.join(targets)))
 
 
 def score(source_word, expected_target_word, translations):
