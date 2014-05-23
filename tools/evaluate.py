@@ -73,7 +73,7 @@ def parse_args():
                         type=parse_cmdline_kwarg,
                         help=('Float or integer keyword arguments to '
                               'pass to the model (of the form )'))
-    parser.add_argument('--test-on-train', default=False,
+    parser.add_argument('--test-on-train', default=False, action='store_true',
                         help='Test on the same data used to train')
 
     arguments = parser.parse_args()
