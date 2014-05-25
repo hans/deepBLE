@@ -73,12 +73,12 @@ class NeuralTranslationModel(TranslationModel):
         output_size = self.target_vsm.layer1_size
 
         # Hidden layer with sigmoid activation function
-        hidden_layer = mlp.Sigmoid(layer_name='hidden', irange=.1, init_bias=1.,
+        hidden_layer = mlp.Sigmoid(layer_name='hidden', irange=.05, init_bias=1.,
                                    use_bias=self.bias,
                                    dim=self.hidden_layer_size)
 
         # Output layer with linear activation function
-        output_layer = mlp.Linear(output_size, 'output', irange=.1,
+        output_layer = mlp.Linear(output_size, 'output', irange=.05,
                                   use_bias=self.bias)
 
         layers = [hidden_layer, output_layer]
