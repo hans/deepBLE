@@ -1,4 +1,5 @@
 import logging
+import pickle
 
 import numpy as np
 from numpy.linalg import pinv
@@ -30,3 +31,12 @@ class LinearTranslationModel(TranslationModel):
             raise RuntimeError("Model not yet trained")
 
         return self.matrix.dot(source_vec)
+
+    def load(self, path):
+        with open(path, 'r') as matrix_f:
+            self.matrix = pickle.load(matrix_f)
+
+    def save(self, path):
+        logging.info("Saving linear model to '{}'".format(path))
+        with open(path, 'w') as matrix_f:
+            pickle.dump(self.matrix, matrix_f)
