@@ -6,8 +6,11 @@ import numpy as np
 from pylearn2.costs import mlp as mlp_costs
 from pylearn2.costs.cost import SumOfCosts
 from pylearn2.models import mlp
+from pylearn2.train import Train
 from pylearn2.training_algorithms import sgd
-from pylearn2.termination_criteria import EpochCounter, MonitorBased
+from pylearn2.training_algorithms.sgd import MonitorBasedLRAdjuster
+from pylearn2.termination_criteria import (EpochCounter, ChannelTarget,
+                                           MonitorBased)
 from pylearn2.datasets.dense_design_matrix import DenseDesignMatrix
 import theano
 
@@ -86,24 +89,25 @@ class NeuralTranslationModel(TranslationModel):
         # Build cost function
         error_cost = mlp_costs.Default()
         regularization_cost = mlp_costs.WeightDecay([1., 1.])
-        cost_expr = SumOfCosts([error_cost])# , (.5, regularization_cost)])
+        cost_expr = SumOfCosts([error_cost])#, (.01, regularization_cost)])
 
-        # Initialize SGD trainer
-        trainer = sgd.SGD(cost=cost_expr,
-                          learning_rate=self.learning_rate,
-                          batch_size=self.batch_size,
-                          termination_criterion=MonitorBased(.0000001, N=100),
-                          monitoring_dataset=ds_cv)
-        trainer.setup(self.network, ds_train)
+        # Initialize SGD training algo
+        algorithm = sgd.SGD(cost=cost_expr,
+                            learning_rate=self.learning_rate,
+                            batch_size=self.batch_size,
+                            termination_criterion=EpochCounter(100000),#MonitorBased(.000001, N=5),
+                            monitoring_dataset=ds_cv)
 
-        while True:
-            trainer.train(dataset=ds_train)
+        # Now build trainer
 
-            self.network.monitor.report_epoch()
-            self.network.monitor()
+        # Extension: update learning rate based on cost changes
+        extensions = [MonitorBasedLRAdjuster()]
 
-            if not trainer.continue_learning(self.network):
-                break
+        trainer = Train(model=self.network, dataset=ds_train,
+                        algorithm=algorithm, extensions=extensions)
+
+        # TODO constant-ize time budget
+        trainer.main_loop()
 
         self.make_network_fn()
 
