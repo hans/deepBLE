@@ -15,7 +15,7 @@ MODEL = None
 logger = logging.getLogger(__name__)
 
 
-def get_translations(source_word, threshold=20):
+def get_translations(source_word, threshold=100):
     """Fetch the top `threshold` translations for the given
     source-language word.
 
