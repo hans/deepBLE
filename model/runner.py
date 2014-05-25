@@ -34,7 +34,7 @@ def get_translations(source_word, threshold=20):
 
 
 def log_translations(source_word, target_word, translations):
-    targets = [u'**{}**'.format(target) if target == source_word else target
+    targets = [u'**{}**'.format(target) if target == target_word else target
                for target in translations]
     logging.info(u'Translations of {}: {}'
                  .format(source_word, u' '.join(targets)))
