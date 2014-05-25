@@ -73,6 +73,11 @@ def evaluate_model(model, test_data):
     # scores = [x for x in pool.imap_unordered(score, test_data)
     #           if x is not None]
     for source_word, target_word in test_data:
+        if target_word not in model.target_vsm:
+            logging.error(u"Word '{}' not found in target VSM"
+                          .format(target_word))
+            continue
+
         translations = get_translations(source_word)
         if translations is None:
             continue
