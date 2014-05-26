@@ -1,5 +1,4 @@
 Cython==0.20.1
-PyBrain==0.3
 gensim==0.9.1
 ipython==2.0.0
 nose==1.3.3
