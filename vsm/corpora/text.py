@@ -11,7 +11,7 @@ class TextCorpus(gensim.corpora.TextCorpus):
     - Support loading of pre-built dictionary
     """
 
-    def __init__(self, input=None, dictionary=None):
+    def __init__(self, input=None, dictionary=None, dictionary_save_path=None):
         super(gensim.corpora.TextCorpus, self).__init__()
 
         self.input = input
@@ -28,3 +28,6 @@ class TextCorpus(gensim.corpora.TextCorpus):
                                 "initialized in some other way.")
         else:
             self.dictionary = dictionary
+
+        if dictionary_save_path is not None:
+            self.dictionary.save(dictionary_save_path)
