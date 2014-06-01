@@ -89,6 +89,7 @@ def parse_args():
 MODEL_MAPPING = {
     'linear': model.LinearTranslationModel,
     'neural': model.NeuralTranslationModel,
+    'random': model.RandomTranslationModel,
 }
 
 def main(arguments):
