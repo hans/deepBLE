@@ -87,8 +87,10 @@ def parse_args():
 
 
 MODEL_MAPPING = {
+    'identity': model.IdentityTranslationModel,
     'linear': model.LinearTranslationModel,
     'neural': model.NeuralTranslationModel,
+    'percentile_frequency': model.PercentileFrequencyTranslationModel,
     'random': model.RandomTranslationModel,
 }
 
