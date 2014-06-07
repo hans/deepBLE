@@ -273,13 +273,19 @@ linear model builds a linear transformation between the two spaces. Given
 source-language and target-language training data matrices $W_E, W_F$ (where the
 $i$th columns of the two matrices are the vector word representations
 corresponding to the $i$th training pair) we assert the existence of a
-translation matrix $A$, where $W_F = AW_E$.
+translation matrix $A$, where
+\begin{equation}
+  W_F = AW_E.
+\end{equation}
 
 We compute the linear transformation by taking $A = W_F W_E^+$, where $W_E^+$ is
 the Moore-Penrose pseudoinverse of $W_E$. It is necessary to use the
 pseudoinverse of $W_E$, as the matrix is unlikely to be square and invertible.
 Then given any source-language word vector $w_e$, we calculate the transformed
-target-language word vector as $w_f = A w_e$.
+target-language word vector as
+\begin{equation}
+  w_f = A w_e.
+\end{equation}
 
 \section{Evaluation}
 \label{sec:evaluation}
@@ -329,8 +335,8 @@ properties. The environments are as follows:
 \end{description}
 
 \begin{table*}[htb!]
-    \centering
-    \small
+  \centering
+  \resizebox{\linewidth}{!}{
     \begin{tabular}[t]{l lll}
     \toprule
     Diagnosis & Input & Expected cognate output & Predicted ranked output (translations) \\
@@ -341,9 +347,10 @@ properties. The environments are as follows:
     Alternate sense interpretations & \emph{division} & \emph{división} & \emph{unidad (unit), élite, comando (command), \dots} \\
     \bottomrule
     \end{tabular}
-    \caption{Examples of common error patterns observed in the algorithm's output for
-        the \bt{Cog} environment}
-    \label{tbl:errors}
+  }
+  \caption{Examples of common error patterns observed in the algorithm's output for
+    the \bt{Cog} environment}
+  \label{tbl:errors}
 \end{table*}
 
 Our evaluation metric looks for a single possible translation of a test input
