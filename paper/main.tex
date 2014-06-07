@@ -444,9 +444,8 @@ described in \Cref{subsec:results}.
 \subparagraph{Near misses.} In these cases the algorithm mapped into a precise
 neighborhood of related words, but picked the wrong element from the set. For
 example, the output word \textit{chocolate} is strongly related to the expected
-word \textit{vainilla}. % TODO long paper: future work might examine
-% the actual distance values and "give up" if the top few words are all very
-% close
+word \textit{vainilla}. We describe a possible solution to this type of error in
+\Cref{sec:conclusion}.
 
 \subparagraph{Right neighborhood, wrong spot.} We occasionally mapped into a
 correct larger area of the target language vector space, but still made a
@@ -481,6 +480,15 @@ word in the source or target language corpus. However, training error could be
 greatly reduced by allowing polysemous words to be associated with multiple word
 vectors~\cite{reisinger2010,huang2012}. We believe such an extension will remove
 much of the remaining ambiguity in the input vector spaces.
+
+As mentioned in \Cref{subsec:error-analysis}, a substantial amount of
+translation errors encountered during testing were due to ``near misses'': an
+incorrect selection of a target-language word from a correctly-chosen precise
+semantic neighborhood. Future work might examine the actual distance values
+between the algorithm's target-language vector output and the target-language
+word vectors which we compare to, and make more intelligent translation choices
+(perhaps refusing to provide exactly one output value) when the translation
+seems too semantically ambiguous. % TODO unclear?
 
 % However, as we note that many of our errors are caused by alternate sense interpretations, our approach could be further improved through disambiguation and multiple vector representations per word.
 
