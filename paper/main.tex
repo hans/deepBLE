@@ -497,6 +497,12 @@ word vectors which we compare to, and make more intelligent translation choices
 (perhaps refusing to provide exactly one output value) when the translation
 seems too semantically ambiguous. % TODO unclear?
 
+Lastly, future work might acknowledge the questionable assumption that there
+exists a \emph{function} between source- and target-language words: that is,
+that there is one target-language output for each source-language input. This
+might be overcome by explicitly working to map between VSM clusters (perhaps
+filtered by part of speech) rather than precise words. % TODO worth including?
+
 % However, as we note that many of our errors are caused by alternate sense interpretations, our approach could be further improved through disambiguation and multiple vector representations per word.
 
 \bibliographystyle{acl}
