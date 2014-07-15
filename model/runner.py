@@ -34,11 +34,17 @@ def get_translations(source_word, threshold=10000):
 
 
 def log_translations(source_word, target_word, translations):
-    targets = [u'\033[1m**{}**\033[0m'.format(target)
-               if target == target_word else target
-               for target in translations]
-    logging.info(u'Translations of {}: {}'
-                 .format(source_word, u' '.join(targets)))
+    targets = [u'\033[1m**{}**\033[0m'.format(target.decode('utf-8'))
+               if target == target_word else target.decode('utf-8')
+               for target in translations[:100]]
+
+    try:
+        pos = translations.index(target_word) + 1
+    except ValueError:
+        pos = 0
+
+    logging.info(u'Translations of {} ({}): {}'
+                 .format(source_word, pos, u' '.join(targets)))
 
 
 def score(source_word, expected_target_word, translations):
