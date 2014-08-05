@@ -6,6 +6,9 @@ data/corpus/*
 data/model/*
 data/vsm/*
 
+# paper.. not published!
+paper/main.*
+
 # virtualenv
 .Python
 bin
