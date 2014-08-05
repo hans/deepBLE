@@ -8,9 +8,18 @@ class Word2Vec(gensim.models.Word2Vec):
     """Defines a thin layer over the Gensim Word2Vec implementation:
 
     - Support serializing and loading vocabularies
+        + It is recommended that you provide a full-coverage (i.e., unpruned)
+          vocabulary, and use command-line options to describe how it may be
+          pruned dynamically at runtime.
+        + You can use the `min_count` argument to specify the minimum corpus
+          term frequency in the dynamically pruned vocab, and the
+          `drop_capitals` argument to indicate that terms beginning with
+          capital letters should not be included in the final vocabulary.
     """
 
-    def __init__(self, vocab_path=None, **kwargs):
+    def __init__(self, vocab_path=None, drop_capitals=False, **kwargs):
+        self.drop_capitals = drop_capitals
+
         self.loaded_vocab = None
         if vocab_path is not None:
             logging.info('Loading Word2Vec vocabulary from {}'
@@ -35,7 +44,8 @@ class Word2Vec(gensim.models.Word2Vec):
         # update `index2word` as we go
         i = 0
         for word, vocab_item in self.vocab.iteritems():
-            if vocab_item.count >= self.min_count:
+            if (vocab_item.count >= self.min_count
+                and (not self.drop_capitals or not word.istitle())):
                 vocab_item.index = i
                 self.index2word.append(word)
                 i += 1

@@ -44,6 +44,11 @@ def parse_args():
                                default=DEFAULT_VECTOR_DIMENSIONS,
                                help=('Desired dimensionality of the '
                                      'vectors produced'))
+    word2vec_opts.add_argument('--drop-capitals', action='store_true',
+                               default=False,
+                               help=('Ignore words in the vocabulary '
+                                     'which begin with a capital '
+                                     'letter'))
 
     dictionary_opts = parser.add_mutually_exclusive_group()
     dictionary_opts.add_argument('-d', '--dictionary-path',
@@ -94,7 +99,7 @@ def main(args):
     logging.debug('Now beginning VSM construction with Word2Vec')
 
     model = Word2Vec(sentences=documents, vocab_path=args.vocab_path,
-                     window=args.window_size,
+                     window=args.window_size, drop_capitals=args.drop_capitals,
                      min_count=args.minimum_token_count,
                      size=args.vector_dimensions,
                      workers=multiprocessing.cpu_count())
