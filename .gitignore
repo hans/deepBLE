@@ -1,10 +1,12 @@
 .DS_Store
 *.pyc
 
-# data
+# data, logs
 data/corpus/*
 data/model/*
+data/vocab/*
 data/vsm/*
+log/*
 
 # paper.. not published!
 paper/main.*
