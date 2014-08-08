@@ -32,15 +32,14 @@ class NeuralTranslationModel(TranslationModel):
 
     BATCH_SIZE = 10
 
-    TRAINING_DATA_RATIO = 0.75
+    TRAIN_DEV_SPLIT = 0.9
     """Ratio of data input used for training (compared to total data
-    input). Remaining data is used for cross validation."""
+    input). Remaining data is held out for development testing."""
 
     def __init__(self, source_vsm, target_vsm, bias=BIAS,
                  hidden_layer_size=HIDDEN_LAYER_SIZE,
                  learning_rate=LEARNING_RATE, batch_size=BATCH_SIZE,
                  verbose=False):
-        """TODO document"""
 
         super(NeuralTranslationModel, self).__init__(source_vsm, target_vsm)
 
@@ -53,20 +52,20 @@ class NeuralTranslationModel(TranslationModel):
         self.verbose = verbose
 
     def build_datasets(self, source_vecs, target_vecs):
-        split = int(len(source_vecs) * self.TRAINING_DATA_RATIO)
+        split = int(len(source_vecs) * self.TRAIN_DEV_SPLIT)
 
         X_train = np.mat(source_vecs[:split])
         Y_train = np.mat(target_vecs[:split])
         ds_train = DenseDesignMatrix(X=X_train, y=Y_train)
 
-        X_cv = np.mat(source_vecs[split:])
-        Y_cv = np.mat(target_vecs[split:])
-        ds_cv = DenseDesignMatrix(X=X_cv, y=Y_cv)
+        X_dev = np.mat(source_vecs[split:])
+        Y_dev = np.mat(target_vecs[split:])
+        ds_dev = DenseDesignMatrix(X=X_dev, y=Y_dev)
 
-        return ds_train, ds_cv
+        return ds_train, ds_dev
 
     def train_vecs(self, source_vecs, target_vecs):
-        ds_train, ds_cv = self.build_datasets(source_vecs, target_vecs)
+        ds_train, ds_dev = self.build_datasets(source_vecs, target_vecs)
 
         # Determine visible layer dimensions
         input_size = self.source_vsm.layer1_size
@@ -95,8 +94,8 @@ class NeuralTranslationModel(TranslationModel):
         algorithm = sgd.SGD(cost=cost_expr,
                             learning_rate=self.learning_rate,
                             batch_size=self.batch_size,
-                            termination_criterion=EpochCounter(100000),#MonitorBased(.000001, N=5),
-                            monitoring_dataset=ds_cv)
+                            termination_criterion=EpochCounter(50000),#MonitorBased(.000001, N=5),
+                            monitoring_dataset=ds_train)#cv)
 
         # Now build trainer
 
