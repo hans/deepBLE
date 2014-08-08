@@ -14,8 +14,13 @@
 #     preprint arXiv:1309.4168 (2013).
 
 from argparse import ArgumentParser
+import itertools
 import json
-import urllib
+import logging
+import sys
+import time
+from urllib import quote
+from urllib2 import Request, urlopen
 
 from gensim.models import Word2Vec
 
@@ -28,37 +33,52 @@ def get_top_words(vsm, n=6000, omit_stopwords=False):
                   reverse=True)[:n]
 
 
-def chunk(seq, size):
-    """Partition a sequence into chunks."""
-    return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
+TRANSLATION_URL = ("http://glosbe.com/gapi_v0_1/translate?format=json"
+                   "&from={source}&dest={target}&phrase={input}")
 
+TRANSLATION_HEADERS = {
+    'User-Agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) '
+                   'AppleWebKit/537.36 (KHTML, like Gecko) '
+                   'Chrome/37.0.2062.68 Safari/537.36')
+}
 
-TRANSLATION_URL = ("https://translate.google.com/translate_a/single?"
-                   "client=t&sl={source}&tl={target}&hl=en&dt=bd&dt=ex"
-                   "&dt=ld&dt=md&dt=qc&dt=rw&dt=rm&dt=ss&dt=t&dt=at"
-                   "&dt=sw&ie=UTF-8&oe=UTF-8&pc=9&oc=1&otf=2&ssel=0"
-                   "&tsel=0&q={input}")
+# Sleep between requests to avoid rate limiting
+SLEEP_DURATION = 1
 
 def get_translations(words, source_language, target_language):
     """Get a single translation of each of the given `words` from source
     language `source_language` to target language `target_language` (ISO
-    639-2 language codes)."""
+    639-3 language codes)."""
 
-    # Fetch translations in batches
-    batch_size = 100
+    for word in words:
+        # Skip sentence boundary markers
+        if word == "</s>":
+            continue
 
-    translations = []
-    for word_chunk in chunk(words, batch_size):
-        word_input = urllib.quote(u'\n'.join(words))
+        word_input = quote(word.encode('utf-8'))
+
         url = TRANSLATION_URL.format(source=source_language,
                                      target=target_language,
                                      input=word_input)
 
-        response = json.loads(urllib.urlopen(url).read())
-        translations.extend([word_candidates[0].strip()
-                             for word_candidates in response[0][0]])
+        request = Request(url, headers=TRANSLATION_HEADERS)
+        response = urlopen(request).read()
 
-    return translations
+        data = json.loads(response)
+        candidates = data['tuc']
+        if not candidates:
+            logging.warn(u'No translations for source word "{}"'.format(word))
+            continue
+
+        candidate = candidates[0]
+        if 'phrase' not in candidate:
+            logging.warn(u'No full translation for source word "{}"'.format(word))
+            continue
+
+        yield word, candidate['phrase']['text']
+
+        # Sleep between requests to avoid rate limiting
+        time.sleep(SLEEP_DURATION)
 
 
 def parse_args():
@@ -70,9 +90,9 @@ def parse_args():
     parser.add_argument('-v', '--vsm-path', required=True,
                         help='Path to a word2vec VSM (binary format)')
     parser.add_argument('-s', '--source', required=True,
-                        help='Source language ISO 639-2 code')
+                        help='Source language ISO 639-3 code')
     parser.add_argument('-t', '--target', required=True,
-                        help='Target language ISO 639-2 code')
+                        help='Target language ISO 639-3 code')
 
     return parser.parse_args()
 
@@ -82,7 +102,7 @@ def main(args):
     words = get_top_words(vsm)
     translations = get_translations(words, args.source, args.target)
 
-    for word, translation in zip(words, translations):
+    for word, translation in translations:
         print u'{}\t{}'.format(word.decode('utf-8'),
                                translation.decode('utf-8'))
 
