@@ -24,7 +24,7 @@ def get_top_words(vsm, n=6000, omit_stopwords=False):
     """Retrieve the top `n` words sorted by descending corpus
     frequency."""
 
-    return sorted(vsm.vocab.iteritems(), key=lambda k: vsm.vocab[k].count,
+    return sorted(vsm.vocab.iterkeys(), key=lambda k: vsm.vocab[k].count,
                   reverse=True)[:n]
 
 
