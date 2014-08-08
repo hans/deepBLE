@@ -19,18 +19,19 @@ import json
 import logging
 import sys
 import time
-from urllib import quote
-from urllib2 import Request, urlopen
+import urllib
 
 from gensim.models import Word2Vec
+import requests
 
 
 def get_top_words(vsm, n=6000, omit_stopwords=False):
     """Retrieve the top `n` words sorted by descending corpus
     frequency."""
 
-    return sorted(vsm.vocab.iterkeys(), key=lambda k: vsm.vocab[k].count,
-                  reverse=True)[:n]
+    ret = sorted(vsm.vocab.iterkeys(), key=lambda k: vsm.vocab[k].count,
+                 reverse=True)[:n]
+    return [x.decode('utf-8') for x in ret]
 
 
 TRANSLATION_URL = ("http://glosbe.com/gapi_v0_1/translate?format=json"
@@ -55,16 +56,15 @@ def get_translations(words, source_language, target_language):
         if word == "</s>":
             continue
 
-        word_input = quote(word.encode('utf-8'))
+        word_input = urllib.quote(word.encode('utf-8'))
 
         url = TRANSLATION_URL.format(source=source_language,
                                      target=target_language,
                                      input=word_input)
 
-        request = Request(url, headers=TRANSLATION_HEADERS)
-        response = urlopen(request).read()
+        response = requests.get(url, headers=TRANSLATION_HEADERS)
 
-        data = json.loads(response)
+        data = response.json()
         candidates = data['tuc']
         if not candidates:
             logging.warn(u'No translations for source word "{}"'.format(word))
@@ -103,8 +103,8 @@ def main(args):
     translations = get_translations(words, args.source, args.target)
 
     for word, translation in translations:
-        print u'{}\t{}'.format(word.decode('utf-8'),
-                               translation.decode('utf-8'))
+        print '{}\t{}'.format(word.encode('utf-8'),
+                              translation.encode('utf-8'))
 
 
 if __name__ == '__main__':
