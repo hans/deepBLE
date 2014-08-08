@@ -67,11 +67,11 @@ def parse_args():
                      'et al. (2013). See the source of this file for '
                      'more information.'))
 
-    parser.add_argument('-v', '--vsm-path',
+    parser.add_argument('-v', '--vsm-path', required=True,
                         help='Path to a word2vec VSM (binary format)')
-    parser.add_argument('-s', '--source',
+    parser.add_argument('-s', '--source', required=True,
                         help='Source language ISO 639-2 code')
-    parser.add_argument('-t', '--target',
+    parser.add_argument('-t', '--target', required=True,
                         help='Target language ISO 639-2 code')
 
     return parser.parse_args()
