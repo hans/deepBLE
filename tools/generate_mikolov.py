@@ -85,3 +85,8 @@ def main(args):
     for word, translation in zip(words, translations):
         print u'{}\t{}'.format(word.decode('utf-8'),
                                translation.decode('utf-8'))
+
+
+if __name__ == '__main__':
+    arguments = parse_args()
+    main(arguments)
