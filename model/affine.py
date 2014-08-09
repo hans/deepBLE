@@ -46,7 +46,10 @@ class AffineTranslationModel(TranslationModel):
         if self.matrix is None:
             raise RuntimeError("Model not yet trained")
 
-        out = self.matrix.dot(add_bias(source_vec))
+        # Add bias row
+        source_vec = np.append(source_vec, 1)
+
+        out = np.squeeze(np.asarray(self.matrix.dot(source_vec)))
 
         # Remove bias row
         return out[:-1]
