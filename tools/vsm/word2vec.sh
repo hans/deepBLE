@@ -23,12 +23,13 @@ fi
 CORPUS_NAME=$1
 shift
 
-while getopts "r:" o; do
+while getopts ":r:" o; do
     case "${o}" in
 	r)
 	    VOCAB_PATH="${OPTARG}"; shift 2;;
 	*)
-	    usage;;
+	    # Ignore word2vec arguments
+	    ;;
     esac
 done
 
@@ -75,6 +76,13 @@ if [ -z $VOCAB_PATH ]; then
     else
 	WORD2VEC_ARGS="-save-vocab $VOCAB_PATH $WORD2VEC_ARGS"
     fi
+else
+    if ! [ -f $VOCAB_PATH ]; then
+	echo "Failed to read vocab from ${VOCAB_PATH}" 1>&2
+	exit 1
+    fi
+
+    WORD2VEC_ARGS="-read-vocab $VOCAB_PATH $WORD2VEC_ARGS"
 fi
 
 # Multithreading

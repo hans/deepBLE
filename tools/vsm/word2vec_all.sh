@@ -20,6 +20,7 @@ BASEDIR=$(readlink -f `dirname "$SCRIPT"`/../..)
 for size in 100 200 300 400 500 600 700 800; do
     for window in 5 10; do
 	for min_count in 20 100; do
+	    echo "${BASEDIR}/tools/vsm/word2vec.sh ${CORPUS} ${EXTRA_ARGS}"
 	    eval $BASEDIR/tools/vsm/word2vec.sh "${CORPUS}" $EXTRA_ARGS \
 		-size $size -window $window -mincount $min_count \
 		-hs 1 -negative 0
