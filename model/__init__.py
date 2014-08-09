@@ -6,3 +6,4 @@ from neural import NeuralTranslationModel
 from percentile_frequency import PercentileFrequencyTranslationModel
 from random import RandomTranslationModel
 from clustered_linear import ClusteredLinearTranslationModel
+from affine import AffineTranslationModel

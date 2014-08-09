@@ -96,6 +96,7 @@ MODEL_MAPPING = {
     'percentile_frequency': model.PercentileFrequencyTranslationModel,
     'random': model.RandomTranslationModel,
     'clustered_linear': model.ClusteredLinearTranslationModel,
+    'affine': model.AffineTranslationModel,
 }
 
 def main(arguments):
