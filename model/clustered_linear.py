@@ -29,7 +29,7 @@ class ClusteredLinearTranslationModel(TranslationModel):
                                                               target_vsm)
 
         # TODO guess clustering more scientifically
-        self.num_clusters = num_clusters or 1
+        self.num_clusters = int(num_clusters) or 1
 
         # k * N array of cluster centroids (where k = number of
         # clusters). Constructed lazily in `build_clusters`
