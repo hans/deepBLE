@@ -42,9 +42,6 @@ if [ ! -f $CORPUS_PATH ]; then
     exit 1
 fi
 
-# Shift off the language argument -- the rest goes to word2vec
-shift
-
 WORD2VEC_ARGS="$@"
 
 # Save the training-specific args (i.e., not the mundane ones) so that
