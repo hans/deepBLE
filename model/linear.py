@@ -20,7 +20,7 @@ class LinearTranslationModel(TranslationModel):
         target_matrix = np.matrix(target_vecs).transpose()
 
         # We have $F = AE$, where $F$ is our target matrix (each column
-        # is a word embedding), $E$ is our target matrix, and $A$ is our
+        # is a word embedding), $E$ is our source matrix, and $A$ is our
         # translation matrix.
         #
         # Then $A = F E^{-1}$.

@@ -73,6 +73,9 @@ def parse_args():
                         type=parse_cmdline_kwarg,
                         help=('Float or integer keyword arguments to '
                               'pass to the model (of the form )'))
+    parser.add_argument('--vsm-binary', default=False, action='store_true',
+                        help=('Indicate that the provided VSMs are '
+                              'binary word2vec forms (not gensim)'))
     parser.add_argument('--test-on-train', default=False, action='store_true',
                         help='Test on the same data used to train')
 
@@ -92,11 +95,18 @@ MODEL_MAPPING = {
     'neural': model.NeuralTranslationModel,
     'percentile_frequency': model.PercentileFrequencyTranslationModel,
     'random': model.RandomTranslationModel,
+    'clustered_linear': model.ClusteredLinearTranslationModel,
 }
 
 def main(arguments):
-    vsm_source = Word2Vec.load(arguments.vsm_source)
-    vsm_target = Word2Vec.load(arguments.vsm_target)
+    if arguments.vsm_binary:
+        vsm_source = Word2Vec.load_word2vec_format(arguments.vsm_source,
+                                                   binary=True)
+        vsm_target = Word2Vec.load_word2vec_format(arguments.vsm_target,
+                                                   binary=True)
+    else:
+        vsm_source = Word2Vec.load(arguments.vsm_source)
+        vsm_target = Word2Vec.load(arguments.vsm_target)
 
     # Instantiate model
     model_class = MODEL_MAPPING[arguments.model]
