@@ -84,9 +84,14 @@ class TranslationModel(object):
     def translate(self, word, n=5):
         """Translate the given word from source language to target language.
 
-        Returns a list of target language words sorted by decreasing translation
-        probability.
+        Returns a list of target language words encoded as Unicode
+        strings and sorted by decreasing translation probability.
         """
+
+        # VSM stores words as byte strings -- encode if we receive a
+        # Unicode string
+        if isinstance(word, unicode):
+            word = word.encode('utf-8')
 
         try:
             source_vec = self.source_vsm[word]
@@ -101,8 +106,7 @@ class TranslationModel(object):
                                               self.target_vsm[v]))
         ret = ret[:n]
 
-        # Ensure UTF-8 encoding: some VSM loads present the words as
-        # bytes
+        # Return list of Unicode strings
         ret = [word.decode('utf-8') for word in ret]
 
         return ret

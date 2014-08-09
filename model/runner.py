@@ -34,8 +34,8 @@ def get_translations(source_word, threshold=10000):
 
 
 def log_translations(source_word, target_word, translations):
-    targets = [u'\033[1m**{}**\033[0m'.format(target.decode('utf-8'))
-               if target == target_word else target.decode('utf-8')
+    targets = [u'\033[1m**{}**\033[0m'.format(target)
+               if target == target_word else target
                for target in translations[:100]]
 
     try:
