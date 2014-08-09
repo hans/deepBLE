@@ -81,6 +81,15 @@ class TranslationModel(object):
         raise NotImplementedError("This model does not support saving "
                                   "to files")
 
+    def can_translate(self, target_word):
+        """Determine if we can successfully translate to the given
+        word. (If the target VSM doesn't contain the word, there is no
+        possible way to get this right!)"""
+
+        if isinstance(target_word, unicode):
+            target_word = target_word.encode('utf-8')
+        return target_word in self.target_vsm
+
     def translate(self, word, n=5):
         """Translate the given word from source language to target language.
 
