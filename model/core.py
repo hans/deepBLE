@@ -99,7 +99,13 @@ class TranslationModel(object):
         ret = sorted(self.target_vsm.vocab.iterkeys(),
                      key=lambda v: distance.cosine(target_vec,
                                               self.target_vsm[v]))
-        return ret[:n]
+        ret = ret[:n]
+
+        # Ensure UTF-8 encoding: some VSM loads present the words as
+        # bytes
+        ret = [word.decode('utf-8') for word in ret]
+
+        return ret
 
     def translate_vec(self, source_vec):
         """Translate the word represented by the given word vector in
