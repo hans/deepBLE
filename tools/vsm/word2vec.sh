@@ -3,12 +3,15 @@
 NAME=$0
 
 usage() {
-    echo "Usage: $NAME <corpus> [word2vec-args]
+    echo "Usage: $NAME <corpus> [-r <read_vocab_path>] [<word2vec-args>]
 	
 	Where <corpus> is a file in data/corpus.
 
 	The corpus name and the parameters will be used to construct a
-	VSM filename." 1>&2
+	VSM filename.
+	
+	If <read_vocab_path> is provided, word2vec will read the given vocab
+	rather than generating its own or using the precomputed one." 1>&2
 
     exit 1
 }
@@ -17,11 +20,22 @@ if [ $# -lt 1 ]; then
     usage; exit 1
 fi
 
+CORPUS_NAME=$1
+shift
+
+while getopts "r:" o; do
+    case "${o}" in
+	r)
+	    VOCAB_PATH="${OPTARG}"; shift 2;;
+	*)
+	    usage;;
+    esac
+done
+
 # Get path of project directory
 SCRIPT=$(readlink -f "$0")
 BASEDIR=$(readlink -f `dirname "$SCRIPT"`/../..)
 
-CORPUS_NAME=$1
 CORPUS_PATH=`readlink -f "$BASEDIR/data/corpus/$CORPUS_NAME"`
 if [ ! -f $CORPUS_PATH ]; then
     echo "Corpus file $CORPUS_PATH does not exist." 1>&2
@@ -57,11 +71,13 @@ fi
 WORD2VEC_ARGS="-train $CORPUS_PATH -output $OUTPUT_PATH $WORD2VEC_ARGS"
 
 # Have we learned a vocab for this corpus yet?
-VOCAB_PATH=$BASEDIR/data/vocab/$CORPUS_NAME
-if [ -f $VOCAB_PATH ]; then
-    WORD2VEC_ARGS="-read-vocab $VOCAB_PATH $WORD2VEC_ARGS"
-else
-    WORD2VEC_ARGS="-save-vocab $VOCAB_PATH $WORD2VEC_ARGS"
+if [ -z $VOCAB_PATH ]; then
+    VOCAB_PATH=$BASEDIR/data/vocab/$CORPUS_NAME
+    if [ -f $VOCAB_PATH ]; then
+        WORD2VEC_ARGS="-read-vocab $VOCAB_PATH $WORD2VEC_ARGS"
+    else
+	WORD2VEC_ARGS="-save-vocab $VOCAB_PATH $WORD2VEC_ARGS"
+    fi
 fi
 
 # Multithreading
