@@ -19,7 +19,7 @@ fi
 
 # Get path of project directory
 SCRIPT=$(readlink -f "$0")
-BASEDIR=$(dirname `dirname "$SCRIPT"`)
+BASEDIR=$(readlink -f `dirname "$SCRIPT"`/../..)
 
 CORPUS_NAME=$1
 CORPUS_PATH=`readlink -f "$BASEDIR/data/corpus/$CORPUS_NAME"`
