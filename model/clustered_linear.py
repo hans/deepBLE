@@ -28,14 +28,12 @@ class ClusteredLinearTranslationModel(TranslationModel):
         super(ClusteredLinearTranslationModel, self).__init__(source_vsm,
                                                               target_vsm)
 
-
         # TODO guess clustering more scientifically
         self.num_clusters = num_clusters or 1
 
         # k * N array of cluster centroids (where k = number of
-        # clusters)
-        self.clusters = MiniBatchKMeans(n_clusters=self.num_clusters)
-        self.build_clusters()
+        # clusters). Constructed lazily in `build_clusters`
+        self.clusters = None
 
         # Per-cluster linear models
         self.models = None
@@ -44,10 +42,17 @@ class ClusteredLinearTranslationModel(TranslationModel):
         """Retrieve all word representations from the source VSM and
         compute clusters"""
 
+        self.clusters = MiniBatchKMeans(n_clusters=self.num_clusters)
+
         print 'Learning %i clusters' % self.num_clusters
         self.clusters.fit(self.source_vsm.syn0)
 
+        # TODO print cluster information
+
     def train_vecs(self, source_vecs, target_vecs):
+        if not self.clusters:
+            self.build_clusters()
+
         self.models = [None] * self.num_clusters
 
         # n_vecs * d array
@@ -83,9 +88,11 @@ class ClusteredLinearTranslationModel(TranslationModel):
     def load(self, path):
         with open(path, 'r') as f:
             self.clusters, matrices = pickle.load(f)
+        self.num_clusters = self.clusters.n_clusters
 
+        self.models = []
         for matrix in matrices:
-            model = LinearTranslationModel()
+            model = LinearTranslationModel(self.source_vsm, self.target_vsm)
             model.matrix = matrix
             self.models.append(model)
 
