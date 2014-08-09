@@ -66,6 +66,9 @@ class ClusteredLinearTranslationModel(TranslationModel):
                                                    target_vecs):
             vecs_by_cluster[cluster_id].append((source_vec, target_vec))
 
+        for cluster_id, pairs in vecs_by_cluster.items():
+            logging.info('Cluster %i has %i seeds', cluster_id, len(pairs))
+
         if set(vecs_by_cluster.keys()) != set(range(self.num_clusters)):
             # TODO more informative error
             raise RuntimeError("Missing source vectors for some "
