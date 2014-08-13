@@ -9,24 +9,27 @@ from model import TranslationModel
 from model.linear import LinearTranslationModel
 
 
-class ClusteredLinearTranslationModel(TranslationModel):
+class ClusteredTranslationModel(TranslationModel):
     """Learns a mapping between clusters of the source VSM and the
-    target VSM.
+    target VSM."""
 
-    This will (hopefully) allow us to exploit the local structure of
-    the source VSM clusters in a way that a simple linear mapping
-    cannot."""
-
-    def __init__(self, source_vsm, target_vsm, num_clusters=None):
+    def __init__(self, source_vsm, target_vsm, submodel=LinearTranslationModel,
+                 num_clusters=None):
         """Initialize the model and build a clustering of the source
         vector space.
+
+        `submodel` is the model class which should be used to map
+        between individual clusters. Any other model could theoretically
+        be used here, though this class was designed for use with
+        `LinearTranslationModel` and `AffineTranslationModel` as its
+        submodels.
 
         If `num_clusters` is not provided at training time, we will
         try multiple cluster counts and pick the one with the lowest
         resulting distortion."""
 
-        super(ClusteredLinearTranslationModel, self).__init__(source_vsm,
-                                                              target_vsm)
+        super(ClusteredTranslationModel, self).__init__(source_vsm,
+                                                        target_vsm)
 
         # TODO guess clustering more scientifically
         self.num_clusters = int(num_clusters) or 1
@@ -35,7 +38,8 @@ class ClusteredLinearTranslationModel(TranslationModel):
         # clusters). Constructed lazily in `build_clusters`
         self.clusters = None
 
-        # Per-cluster linear models
+        # Per-cluster submodels
+        self.submodel = submodel
         self.models = None
 
     def build_clusters(self):
@@ -75,7 +79,7 @@ class ClusteredLinearTranslationModel(TranslationModel):
                                "clusters")
 
         for cluster_id in range(self.num_clusters):
-            model = LinearTranslationModel(self.source_vsm, self.target_vsm)
+            model = self.submodel(self.source_vsm, self.target_vsm)
             source_vecs, target_vecs = zip(*(vecs_by_cluster[cluster_id]))
             model.train_vecs(list(source_vecs), list(target_vecs))
 
