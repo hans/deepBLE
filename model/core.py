@@ -89,7 +89,7 @@ class TranslationModel(object):
 
         logging.info("Saving {} to '{}'".format(type(self).__name__, path))
         with open(path, 'w') as f:
-            pickle.dump(self.save_object, f)
+            pickle.dump(self.save_object(), f)
 
     def save_object(self):
         """Provide an object with which to serialize the class. This
