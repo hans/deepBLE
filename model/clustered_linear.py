@@ -3,10 +3,10 @@ import logging
 import pickle
 
 import numpy as np
-from numpy.linalg import pinv
 from sklearn.cluster import MiniBatchKMeans
 
-from model import TranslationModel, LinearTranslationModel
+from model import TranslationModel
+from model.linear import LinearTranslationModel
 
 
 class ClusteredLinearTranslationModel(TranslationModel):

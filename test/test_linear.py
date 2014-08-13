@@ -1,7 +1,7 @@
 from gensim.models import Word2Vec
 from nose.tools import assert_equal
 
-from model import LinearTranslationModel
+from model.linear import LinearTranslationModel
 from model.runner import evaluate_model
 
 

@@ -15,7 +15,7 @@ import sys
 from gensim.models import Word2Vec
 from numpy import mean, std
 
-import model
+import model.all
 from model.runner import evaluate_model, score
 
 
@@ -90,13 +90,13 @@ def parse_args():
 
 
 MODEL_MAPPING = {
-    'identity': model.IdentityTranslationModel,
-    'linear': model.LinearTranslationModel,
-    'neural': model.NeuralTranslationModel,
-    'percentile_frequency': model.PercentileFrequencyTranslationModel,
-    'random': model.RandomTranslationModel,
-    'clustered_linear': model.ClusteredLinearTranslationModel,
-    'affine': model.AffineTranslationModel,
+    'identity': model.all.IdentityTranslationModel,
+    'linear': model.all.LinearTranslationModel,
+    'neural': model.all.NeuralTranslationModel,
+    'percentile_frequency': model.all.PercentileFrequencyTranslationModel,
+    'random': model.all.RandomTranslationModel,
+    'clustered_linear': model.all.ClusteredLinearTranslationModel,
+    'affine': model.all.AffineTranslationModel,
 }
 
 def main(arguments):
