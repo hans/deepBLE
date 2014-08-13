@@ -5,6 +5,7 @@ data.
 import argparse
 import codecs
 from datetime import datetime
+from functools import partial
 import json
 import logging
 import multiprocessing
@@ -95,7 +96,10 @@ MODEL_MAPPING = {
     'neural': model.all.NeuralTranslationModel,
     'percentile_frequency': model.all.PercentileFrequencyTranslationModel,
     'random': model.all.RandomTranslationModel,
-    'clustered_linear': model.all.ClusteredLinearTranslationModel,
+    'clustered/linear': partial(model.all.ClusteredTranslationModel,
+                                submodel=model.all.LinearTranslationModel),
+    'clustered/affine': partial(model.all.ClusteredTranslationModel,
+                                submodel=model.all.AffineTranslationModel),
     'affine': model.all.AffineTranslationModel,
 }
 
