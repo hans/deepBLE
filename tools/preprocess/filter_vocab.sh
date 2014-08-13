@@ -15,4 +15,4 @@ fi
 
 # 1. Remove uppercase words (NB: grep [A-Z] class includes things like
 #    Á, etc.) and words with especially pernicious punctuation
-grep -v '[A-Z./()@#\$%^&*_=+{}|\\’“”—]' "${1}"
+grep -v '[][A-Z–—.¿?¡!<>,;:/()@#\$%^&*_=+{}|\\’“”‘´…"»«-]' "${1}"
