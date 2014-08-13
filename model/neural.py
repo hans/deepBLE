@@ -115,15 +115,12 @@ class NeuralTranslationModel(TranslationModel):
         Y_sym = self.network.fprop(X_sym)
         self.network_fn = theano.function([X_sym], Y_sym)
 
-    def load(self, path):
-        with open(path, 'r') as model_f:
-            self.network = pickle.load(model_f)
+    def load_object(self, obj):
+        self.network = obj
         self.make_network_fn()
 
-    def save(self, path):
-        logging.info("Saving neural network model to '{}'".format(path))
-        with open(path, 'w') as model_f:
-            pickle.dump(self.network, model_f)
+    def save_object(self):
+        return self.network
 
     def translate_vec(self, source_vec):
         return self.network_fn(np.array([source_vec]))
