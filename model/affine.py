@@ -54,11 +54,8 @@ class AffineTranslationModel(TranslationModel):
         # Remove bias row
         return out[:-1]
 
-    def load(self, path):
-        with open(path, 'r') as matrix_f:
-            self.matrix = pickle.load(matrix_f)
+    def load_object(self, obj):
+        self.matrix = obj
 
-    def save(self, path):
-        logging.info("Saving affine model to '{}'".format(path))
-        with open(path, 'w') as matrix_f:
-            pickle.dump(self.matrix, matrix_f)
+    def save_object(self):
+        return self.matrix

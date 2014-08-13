@@ -67,13 +67,11 @@ class LogisticRegressionTranslationModel(TranslationModel):
         self.model = LogisticRegression(C=self.C)
         self.model.fit(X, y)
 
-    def load(self, path):
-        with open(path, 'r') as in_file:
-            self.model = pickle.load(in_file)
+    def load_object(self, obj):
+        self.model = obj
 
-    def save(self, path):
-        with open(path, 'w') as out_file:
-            pickle.dump(self.model, out_file)
+    def save_object(self):
+        return self.model
 
     def translate(self, word, n=5):
         try:

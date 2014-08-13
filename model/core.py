@@ -1,4 +1,5 @@
 import logging
+import pickle
 
 from scipy.spatial import distance
 
@@ -70,12 +71,29 @@ class TranslationModel(object):
         for some subclasses.
         """
 
+        logging.info("Loading {} from '{}'".format(type(self).__name__, path))
+        with open(path, 'r') as f:
+            return self.load_object(pickle.load(f))
+
+    def load_object(self, obj):
+        """Initialize the model from its serialized form. The provided
+        parameter is the un-pickled serialized data of the model."""
+
         raise NotImplementedError("This model does not support loading from "
                                   "files")
 
     def save(self, path):
         """Write this model to a path. Only supported for some
         subclasses.
+        """
+
+        logging.info("Saving {} to '{}'".format(type(self).__name__, path))
+        with open(path, 'w') as f:
+            pickle.dump(self.save_object, f)
+
+    def save_object(self):
+        """Provide an object with which to serialize the class. This
+        same object type will be provided to the model in `load_object`.
         """
 
         raise NotImplementedError("This model does not support saving "

@@ -92,20 +92,17 @@ class ClusteredTranslationModel(TranslationModel):
         cluster_id = self.clusters.predict([source_vec])[0]
         return self.models[cluster_id].translate_vec(source_vec)
 
-    def load(self, path):
-        with open(path, 'r') as f:
-            self.clusters, matrices = pickle.load(f)
+    def load_object(self, obj):
+        self.clusters, submodel_type, submodel_data = obj
         self.num_clusters = self.clusters.n_clusters
 
         self.models = []
-        for matrix in matrices:
-            model = LinearTranslationModel(self.source_vsm, self.target_vsm)
-            model.matrix = matrix
+        for submodel_data in submodel_data:
+            model = submodel_type(self.source_vsm, self.target_vsm)
+            model.load_object(submodel_data)
+
             self.models.append(model)
 
-    def save(self, path):
-        logging.info("Saving clustered linear model to '{}'".format(path))
-
-        data = (self.clusters, [model.matrix for model in self.models])
-        with open(path, 'w') as f:
-            pickle.dump(data, f)
+    def save_object(self):
+        return (self.clusters, self.submodel,
+                [model.save_object() for model in self.models])
