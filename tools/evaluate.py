@@ -106,12 +106,16 @@ MODEL_MAPPING = {
 def main(arguments):
     if arguments.vsm_binary:
         vsm_source = Word2Vec.load_word2vec_format(arguments.vsm_source,
-                                                   binary=True)
+                                                   binary=True, norm_only=True)
         vsm_target = Word2Vec.load_word2vec_format(arguments.vsm_target,
-                                                   binary=True)
+                                                   binary=True, norm_only=True)
     else:
         vsm_source = Word2Vec.load(arguments.vsm_source)
         vsm_target = Word2Vec.load(arguments.vsm_target)
+
+        # Compute normalized word vectors and drop the old ones
+        vsm_source.init_sims(replace=True)
+        vsm_target.init_sims(replace=True)
 
     # Instantiate model
     model_class = MODEL_MAPPING[arguments.model]

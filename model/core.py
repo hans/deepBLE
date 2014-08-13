@@ -1,29 +1,7 @@
 import logging
 import pickle
 
-from scipy.spatial import distance
-
-
-def get_word_vector(vsm, word, alternate_encodings=None):
-    """Retrieve the word vector for a given Unicode-encoded word from
-    a VSM.
-
-    Attempts to abstract away some encoding ugliness."""
-
-    if alternate_encodings is None:
-        alternate_encodings = ['utf-8', 'latin-1']
-
-    try:
-        return vsm[word]
-    except KeyError:
-        for encoding in alternate_encodings:
-            try:
-                return vsm[word.encode(encoding)]
-            except UnicodeEncodeError: pass
-            except KeyError: pass
-
-        # Still here?
-        return None
+import numpy as np
 
 
 class TranslationModel(object):
@@ -35,6 +13,27 @@ class TranslationModel(object):
         self.source_vsm = source_vsm
         self.target_vsm = target_vsm
 
+    def _get_vsm_vec(self, vsm, word):
+        if isinstance(word, unicode):
+            word = word.encode('utf-8')
+
+        vocab_item = vsm.vocab[word]
+        return vsm.syn0norm[vocab_item.index]
+
+    def _get_source_vec(self, word):
+        """Get the vector representation of the given source-language
+        word in the source VSM.
+        """
+
+        return self._get_vsm_vec(self.source_vsm, word)
+
+    def _get_target_vec(self, word):
+        """Get the vector representation of the given target-language
+        word in the target VSM.
+        """
+
+        return self._get_vsm_vec(self.target_vsm, word)
+
     def train(self, seeds):
         """Train the model on a seed set, a list of pairs of the form
 
@@ -43,13 +42,15 @@ class TranslationModel(object):
 
         source_vecs, target_vecs = [], []
         for source_word, target_word in seeds:
-            source = get_word_vector(self.source_vsm, source_word)
-            if source is None:
+            try:
+                source = self._get_source_vec(source_word)
+            except KeyError:
                 logging.warn(u'Source VSM missing word {}'.format(source_word))
                 continue
 
-            target = get_word_vector(self.target_vsm, target_word)
-            if target is None:
+            try:
+                target = self._get_target_vec(target_word)
+            except KeyError:
                 logging.warn(u'Target VSM missing word {}'.format(target_word))
                 continue
 
@@ -62,6 +63,8 @@ class TranslationModel(object):
         """Train the model on a vector seed set, two lists where the
         `i`th element of `target_vecs` represents the translation of the
         `i`th element of `source_vecs`.
+
+        The provided vectors should be unit vectors.
         """
 
         raise NotImplementedError("abstract method")
@@ -106,7 +109,7 @@ class TranslationModel(object):
 
         if isinstance(target_word, unicode):
             target_word = target_word.encode('utf-8')
-        return target_word in self.target_vsm
+        return target_word in self.target_vsm.vocab
 
     def translate(self, word, n=5):
         """Translate the given word from source language to target language.
@@ -115,13 +118,8 @@ class TranslationModel(object):
         strings and sorted by decreasing translation probability.
         """
 
-        # VSM stores words as byte strings -- encode if we receive a
-        # Unicode string
-        if isinstance(word, unicode):
-            word = word.encode('utf-8')
-
         try:
-            source_vec = self.source_vsm[word]
+            source_vec = self._get_source_vec(word)
         except KeyError:
             raise ValueError(u"Word '{}' not found in source VSM".format(word))
 
@@ -129,8 +127,8 @@ class TranslationModel(object):
 
         # TODO use KD tree (or NearPy?) for nearest-neighbor lookup
         ret = sorted(self.target_vsm.vocab.iterkeys(),
-                     key=lambda v: distance.cosine(target_vec,
-                                              self.target_vsm[v]))
+                     key=lambda v: np.dot(target_vec,
+                                          self.target_vsm.syn0norm[v]))
         ret = ret[:n]
 
         # Return list of Unicode strings

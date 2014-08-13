@@ -6,7 +6,9 @@ from model.runner import evaluate_model
 
 
 def load_vsm_fixture(name):
-    return Word2Vec.load('test/fixtures/{}'.format(name))
+    m = Word2Vec.load('test/fixtures/{}'.format(name))
+    m.init_sims()
+    return m
 
 
 def test_3words():

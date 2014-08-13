@@ -75,7 +75,7 @@ class LogisticRegressionTranslationModel(TranslationModel):
 
     def translate(self, word, n=5):
         try:
-            source_vec = self.source_vsm[word]
+            source_vec = self._get_source_vec(word)
         except KeyError:
             raise ValueError(u"Word '{}' not found in source VSM".format(word))
 
@@ -84,7 +84,7 @@ class LogisticRegressionTranslationModel(TranslationModel):
         # in decreasing sorted order
         def score(target_word):
             # Classifier input
-            x = np.concatenate(source_vec, self.target_vsm[target_word])
+            x = np.concatenate(source_vec, self._get_target_vec(target_word))
 
             return self.model.predict(x)
 
