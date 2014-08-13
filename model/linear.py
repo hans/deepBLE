@@ -30,7 +30,7 @@ class LinearTranslationModel(TranslationModel):
         if self.matrix is None:
             raise RuntimeError("Model not yet trained")
 
-        return self.matrix.dot(source_vec)
+        return np.squeeze(np.asarray(self.matrix.dot(source_vec)))
 
     def load_object(self, obj):
         self.matrix = obj
