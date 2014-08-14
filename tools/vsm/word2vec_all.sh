@@ -17,16 +17,13 @@ EXTRA_ARGS="${@}"
 SCRIPT=$(readlink -f "$0")
 BASEDIR=$(readlink -f `dirname "$SCRIPT"`/../..)
 
-for size in 100 200 300 400 500 600 700 800; do
-    for window in 5 10; do
-	for min_count in 20 100; do
+MIN_COUNT=40
+
+for window in 5 10; do
+    for size in 100 200 300 400 500 600 700 800; do
 	    echo "${BASEDIR}/tools/vsm/word2vec.sh ${CORPUS} ${EXTRA_ARGS}"
 	    eval $BASEDIR/tools/vsm/word2vec.sh "${CORPUS}" $EXTRA_ARGS \
-		-size $size -window $window -mincount $min_count \
-		-hs 1 -negative 0
-	    eval $BASEDIR/tools/vsm/word2vec.sh "${CORPUS}" $EXTRA_ARGS \
-		-size $size -window $window -mincount $min_count \
-		-hs 0 -negative 5
-	done
+		-size $size -window $window -mincount $MIN_COUNT \
+		-hs 0 -negative 5 -sample 1e-5
     done
 done
