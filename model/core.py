@@ -128,7 +128,7 @@ class TranslationModel(object):
         # TODO use KD tree (or NearPy?) for nearest-neighbor lookup
         ret = sorted(self.target_vsm.vocab.iterkeys(),
                      key=lambda v: np.dot(target_vec,
-                                          self.target_vsm.syn0norm[v]))
+                                          self._get_target_vec(v)))
         ret = ret[:n]
 
         # Return list of Unicode strings
