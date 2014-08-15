@@ -2,6 +2,7 @@ import logging
 import pickle
 
 import numpy as np
+from numpy.linalg import norm
 
 
 class TranslationModel(object):
@@ -124,6 +125,9 @@ class TranslationModel(object):
             raise ValueError(u"Word '{}' not found in source VSM".format(word))
 
         target_vec = self.translate_vec(source_vec)
+
+        # Ensure unit vector
+        target_vec = target_vec / norm(target_vec)
 
         # TODO use KD tree (or NearPy?) for nearest-neighbor lookup
         ret = sorted(self.target_vsm.vocab.iterkeys(),
