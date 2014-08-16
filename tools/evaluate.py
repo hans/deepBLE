@@ -8,16 +8,13 @@ from datetime import datetime
 from functools import partial
 import json
 import logging
-import multiprocessing
-from multiprocessing.pool import Pool
-import random
 import sys
 
 from gensim.models import Word2Vec
 from numpy import mean, std
 
 import model.all
-from model.runner import evaluate_model, score
+from model.runner import evaluate_model
 
 
 def load_seed_data(path):
