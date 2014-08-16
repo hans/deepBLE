@@ -3,16 +3,6 @@ import pickle
 from pprint import pprint
 
 import numpy as np
-from pylearn2.costs import mlp as mlp_costs
-from pylearn2.costs.cost import SumOfCosts
-from pylearn2.models import mlp
-from pylearn2.train import Train
-from pylearn2.training_algorithms import sgd
-from pylearn2.training_algorithms.sgd import MonitorBasedLRAdjuster
-from pylearn2.termination_criteria import (EpochCounter, ChannelTarget,
-                                           MonitorBased)
-from pylearn2.datasets.dense_design_matrix import DenseDesignMatrix
-import theano
 
 from model.core import TranslationModel
 
@@ -40,6 +30,17 @@ class NeuralTranslationModel(TranslationModel):
                  hidden_layer_size=HIDDEN_LAYER_SIZE,
                  learning_rate=LEARNING_RATE, batch_size=BATCH_SIZE,
                  verbose=False):
+
+        from pylearn2.costs import mlp as mlp_costs
+        from pylearn2.costs.cost import SumOfCosts
+        from pylearn2.models import mlp
+        from pylearn2.train import Train
+        from pylearn2.training_algorithms import sgd
+        from pylearn2.training_algorithms.sgd import MonitorBasedLRAdjuster
+        from pylearn2.termination_criteria import (EpochCounter, ChannelTarget,
+                                                   MonitorBased)
+        from pylearn2.datasets.dense_design_matrix import DenseDesignMatrix
+        import theano
 
         super(NeuralTranslationModel, self).__init__(source_vsm, target_vsm)
 
