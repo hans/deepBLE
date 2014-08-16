@@ -48,11 +48,6 @@ def save_model(model, originating_arguments):
             json.dump(originating_arguments, arguments_f)
 
 
-def parse_cmdline_kwarg(kwarg):
-    param, value = kwarg.split('=')
-    return param, float(value)
-
-
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Evaluate the performance of a model.')
@@ -70,10 +65,9 @@ def parse_args():
     parser.add_argument('-d', '--data', required=True,
                         help=('Path to data TSV file (used for model '
                               'seeding (if training) and testing)'))
-    parser.add_argument('-m', '--model-arguments', action='append',
-                        type=parse_cmdline_kwarg,
-                        help=('Float or integer keyword arguments to '
-                              'pass to the model (of the form )'))
+    parser.add_argument('-m', '--model-config',
+                        help=('Path to JSON dictionary file of keyword '
+                              'arguments to pass to the model'))
     parser.add_argument('--vsm-binary', default=False, action='store_true',
                         help=('Indicate that the provided VSMs are '
                               'binary word2vec forms (not gensim)'))
@@ -82,10 +76,11 @@ def parse_args():
 
     arguments = parser.parse_args()
 
-    if arguments.model_arguments is None:
+    if arguments.model_config is None:
         arguments.model_arguments = {}
     else:
-        arguments.model_arguments = dict(arguments.model_arguments)
+        with open(arguments.model_config, 'r') as config_f:
+            arguments.model_arguments = json.load(arguments.model_arguments)
 
     return arguments
 
