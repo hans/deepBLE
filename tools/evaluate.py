@@ -157,8 +157,7 @@ def main(arguments):
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.DEBUG)
-    # logging.getLogger().setFormatter(
-    #     logging.Formatter('%(asctime)s : %(levelname)s : %(message)s'))
+    logging.basicConfig(formatter='%(asctime)s : %(levelname)s : %(message)s')
 
     arguments = parse_args()
     main(arguments)
