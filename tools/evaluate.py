@@ -20,12 +20,11 @@ import model.all
 from model.runner import evaluate_model, score
 
 
-def train_test_split(data, training_pct=80):
-    """Split input data into training and test sets."""
+def load_seed_data(path):
+    """Load seed data from the TSV file at the given path."""
 
-    random.shuffle(data)
-    split = int(len(data) * (training_pct / 100.0))
-    return data[:split], data[split:]
+    with codecs.open(path, 'r', encoding='utf-8') as data_file:
+        return [tuple(line.strip().split('\t')) for line in data_file]
 
 
 def save_model(model, originating_arguments):
@@ -62,19 +61,27 @@ def parse_args():
     parser.add_argument('-t', '--vsm-target', required=True,
                         help=('Path to gensim word2vec file for target '
                               'language'))
-    parser.add_argument('-d', '--data', required=True,
-                        help=('Path to data TSV file (used for model '
-                              'seeding (if training) and testing)'))
+    parser.add_argument('--data-train',
+                        help=('Path to data TSV file for training'))
+    parser.add_argument('--data-test',
+                        help=('Path to data TSV file for testing'))
     parser.add_argument('-m', '--model-config',
                         help=('Path to JSON dictionary file of keyword '
                               'arguments to pass to the model'))
     parser.add_argument('--vsm-binary', default=False, action='store_true',
                         help=('Indicate that the provided VSMs are '
                               'binary word2vec forms (not gensim)'))
-    parser.add_argument('--test-on-train', default=False, action='store_true',
-                        help='Test on the same data used to train')
 
     arguments = parser.parse_args()
+
+    # Enforce argument invariants
+    if not arguments.data_train and not arguments.data_test:
+        logging.error('No data provided with --data-train or --data-test')
+        sys.exit(1)
+    elif arguments.model_file is not None and arguments.data_train is not None:
+        logging.error('Cannot retrain provided model -- please omit '
+                      '--data-train or --model-file')
+        sys.exit(1)
 
     if arguments.model_config is None:
         arguments.model_arguments = {}
@@ -117,10 +124,10 @@ def main(arguments):
     model = model_class(vsm_source, vsm_target, **arguments.model_arguments)
 
     # Load seed data
-    with codecs.open(arguments.data, 'r', encoding='utf-8') as data_file:
-        data = [tuple(line.strip().split('\t')) for line in data_file]
-    # By default, use all the data as test data
-    test_pairs = data
+    data_train = (load_seed_data(arguments.data_train)
+                  if arguments.data_train else None)
+    data_test = (load_seed_data(arguments.data_test)
+                 if arguments.data_test else None)
 
     # Attempt to load model from file
     if arguments.model_file is not None:
@@ -133,26 +140,22 @@ def main(arguments):
             logging.error("Requested model does not support loading from "
                           "saved files")
             sys.exit(1)
-    else:
-        if arguments.test_on_train:
-            training_pairs = test_pairs
-        else:
-            training_pairs, test_pairs = train_test_split(data)
 
-        model.train(training_pairs)
+    # Train model
+    if data_train is not None:
+        model.train(data_train)
 
         save_arguments = vars(arguments)
         save_arguments['extra'] = {
-            'training_pairs': training_pairs
+            'training_pairs': data_train
         }
 
         save_model(model, save_arguments)
 
-    # Now perform evaluation
-    #
-    # TODO print nicely
-    scores = list(evaluate_model(model, test_pairs))
-    print mean(scores), std(scores)
+    # Test model
+    if data_test is not None:
+        scores = list(evaluate_model(model, data_test))
+        print mean(scores), std(scores)
 
 
 if __name__ == '__main__':
