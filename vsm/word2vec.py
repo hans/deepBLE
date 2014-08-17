@@ -1,7 +1,10 @@
 import logging
+import numpy as np
 import pickle
 
 import gensim.models
+from gensim.models.word2vec import Vocab
+from gensim.utils import smart_open
 
 
 class Word2Vec(gensim.models.Word2Vec):
@@ -28,6 +31,52 @@ class Word2Vec(gensim.models.Word2Vec):
                 self.loaded_vocab = pickle.load(vocab_f)
 
         super(Word2Vec, self).__init__(**kwargs)
+
+    @classmethod
+    def load_glove_format(cls, vectors_path, vocab_path, norm_only=True):
+        """
+        Load a VSM model from the text format saved by the GloVe tool.
+
+        See `load_word2vec_format` for description of `norm_only` param.
+        """
+
+        result = Word2Vec()
+
+        logging.info("Loading vocab from {}".format(vocab_path))
+        with smart_open(vocab_path, 'rb') as vocab_in:
+            for index, line in enumerate(vocab_in):
+                word, count = line.strip().split()
+                result.vocab[word] = Vocab(index=index, count=count)
+
+        logging.info("Loading projection weights from {}".format(vectors_path))
+
+        first_run = True
+        with smart_open(vectors_path, 'rb') as vectors_in:
+            for index, line in enumerate(vectors_in):
+                parts = line.split()
+
+                # Set metadata by examining the first line's contents
+                if first_run:
+                    result.layer1_size = len(parts) - 1
+                    result.syn0 = np.zeros(
+                        (len(result.vocab), result.layer1_size),
+                        dtype=np.float32)
+
+                    first_run = False
+
+                if len(parts) != result.layer1_size + 1:
+                    raise ValueError("invalid vector on line {}".format(index))
+
+                word, weights = parts[0], map(np.float32, parts[1:])
+
+                result.index2word.append(word)
+                result.syn0[index] = weights
+
+        logging.info("Loaded {} matrix from {}"
+                     .format(result.syn0.shape, vocab_path))
+
+        result.init_sims(norm_only)
+        return result
 
     def build_vocab(self, sentences):
         # Default to expensive way if we don't have a vocab loaded from file
