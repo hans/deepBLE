@@ -39,7 +39,7 @@
             },
         termination_criterion: !obj:pylearn2.termination_criteria.MonitorBased {
             channel_name: "dev_objective",
-            prop_decrease: 0.01,
+            prop_decrease: 0.00001,
             N: 100
         },
     },
