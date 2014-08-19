@@ -26,14 +26,9 @@
                 ],
         nvis: 200,
     },
-    algorithm: !obj:pylearn2.training_algorithms.bgd.BGD {
+    algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
         cost: !obj:model.neural.core.MeanSquaredErrorCost { },
-        line_search_mode: 'exhaustive',
-        batch_size: 200,
-        conjugate: 1,
-        reset_conjugate: 0,
-        reset_alpha: 0,
-        updates_per_batch: 10,
+        batch_size: 10,
         monitoring_dataset:
             {
                 'train' : *train,
@@ -48,12 +43,11 @@
         },
     },
     extensions: [
+        !obj:pylearn2.training_algorithms.sgd.MonitorBasedLRAdjuster { },
         !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
              channel_name: 'dev_objective',
              save_path: "${PYLEARN2_TRAIN_FILE_FULL_STEM}_best.pkl"
         },
     ],
     save_freq: 1
-
-  # TODO MonitorBasedLRAdjuster
 }
