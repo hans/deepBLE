@@ -69,7 +69,11 @@ class NegatingRectifiedLinear(mlp.RectifiedLinear):
     def __init__(self, **kwargs):
         super(NegatingRectifiedLinear, self).__init__(**kwargs)
 
-        # Build negating matrix now that we know our output dimensions
+    @wraps(mlp.Layer.set_input_space)
+    def set_input_space(self, space):
+        super(NegatingRectifiedLinear, self).set_input_space(space)
+
+        # Build negating matrix now that we know our layer dimensions
 
         out_dim = self.get_output_space().get_total_dimension()
 
