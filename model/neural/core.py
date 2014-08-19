@@ -3,6 +3,7 @@ import pickle
 from pprint import pprint
 
 import numpy as np
+from pylearn2.costs import cost
 
 from model.core import TranslationModel
 
@@ -19,6 +20,32 @@ def get_dataset(which):
     """
 
     return getattr(get_dataset, which)
+
+
+class MeanSquaredErrorCost(cost.DefaultDataSpecsMixin, cost.Cost):
+    """
+    Mean squared error:
+
+    MSE = 1/n \sum (Yhat - Y)^2
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(MeanSquaredErrorCost, self).__init__(*args, **kwargs)
+
+    def expr(self, model, data, **kwargs):
+        """
+        Calculate the MSE for the given data.
+        """
+
+        import theano.tensor as T
+
+        self.get_data_specs(model)[0].validate(data)
+
+        X, Y = data
+        print Y
+        Yhat = model(X)
+
+        return T.sqr(Yhat - Y).mean()
 
 
 class NeuralTranslationModel(TranslationModel):

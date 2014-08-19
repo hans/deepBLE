@@ -3,7 +3,7 @@
 # params!
 
 !obj:pylearn2.train.Train {
-    dataset: &train !obj:model.neural.get_dataset {
+    dataset: &train !obj:model.neural.core.get_dataset {
         which: 'train'
     },
     model: !obj:pylearn2.models.mlp.MLP {
@@ -27,6 +27,7 @@
         nvis: 200,
     },
     algorithm: !obj:pylearn2.training_algorithms.bgd.BGD {
+        cost: !obj:model.neural.core.MeanSquaredErrorCost { },
         line_search_mode: 'exhaustive',
         batch_size: 200,
         conjugate: 1,
@@ -36,19 +37,19 @@
         monitoring_dataset:
             {
                 'train' : *train,
-                'dev' : !obj:model.neural.get_dataset {
+                'dev' : !obj:model.neural.core.get_dataset {
                             which: 'dev'
                           },
             },
         termination_criterion: !obj:pylearn2.termination_criteria.MonitorBased {
-            channel_name: "dev_y_mse",
+            channel_name: "dev_objective",
             prop_decrease: 0.01,
             N: 100
         },
     },
     extensions: [
         !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
-             channel_name: 'dev_y_mse',
+             channel_name: 'dev_objective',
              save_path: "${PYLEARN2_TRAIN_FILE_FULL_STEM}_best.pkl"
         },
     ],
