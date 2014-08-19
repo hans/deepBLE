@@ -1,9 +1,22 @@
+"""
+Defines the framework for the neural-network translation model
+experiments.
+
+Note that most of the Pylearn and Theano imports are lazy-loaded
+within the functions / classes that require them -- this is to avoid
+annoying load times during non-NN-related testing.
+"""
+
 import logging
 import pickle
 from pprint import pprint
 
 import numpy as np
 from pylearn2.costs import cost
+from pylearn2.models import mlp
+from pylearn2.utils import wraps
+import theano
+import theano.tensor as T
 
 from model.core import TranslationModel
 
@@ -39,14 +52,35 @@ class MeanSquaredErrorCost(cost.DefaultDataSpecsMixin, cost.Cost):
         Calculate the MSE for the given data.
         """
 
-        import theano.tensor as T
-
         self.get_data_specs(model)[0].validate(data)
 
         X, Y = data
         Yhat = model.fprop(X)
 
         return T.sqr(Yhat - Y).mean()
+
+
+class NegatingRectifiedLinear(mlp.RectifiedLinear):
+    """
+    Rectified linear MLP layer which negates its activation function
+    on half of its neurons (Glorot and Bengio 2011).
+    """
+
+    def __init__(self, **kwargs):
+        super(NegatingRectifiedLinear, self).__init__(**kwargs)
+
+        in_dim = self.get_input_space().get_total_dimension()
+
+        num_positive = in_dim / 2
+        num_negative = in_dim - num_positive
+
+        self.modifier = theano.shared(np.concatenate((
+            np.ones(num_positive), -1 * np.ones(num_negative))))
+
+    @wraps(mlp.Layer.fprop)
+    def fprop(self, state_below):
+        p = super(NegatingRectifiedLinear, self).fprop(state_below)
+        return self.modifier * p
 
 
 class NeuralTranslationModel(TranslationModel):
@@ -100,7 +134,6 @@ class NeuralTranslationModel(TranslationModel):
     def train_vecs(self, source_vecs, target_vecs):
         self.build_datasets(source_vecs, target_vecs)
 
-        from pylearn2.models import mlp
         from pylearn2.space import VectorSpace
         from pylearn2.utils.serial import load_train_file
 
