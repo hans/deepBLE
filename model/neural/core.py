@@ -44,7 +44,6 @@ class MeanSquaredErrorCost(cost.DefaultDataSpecsMixin, cost.Cost):
         self.get_data_specs(model)[0].validate(data)
 
         X, Y = data
-        print Y
         Yhat = model.fprop(X)
 
         return T.sqr(Yhat - Y).mean()
