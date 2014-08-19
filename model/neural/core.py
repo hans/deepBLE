@@ -45,7 +45,7 @@ class MeanSquaredErrorCost(cost.DefaultDataSpecsMixin, cost.Cost):
 
         X, Y = data
         print Y
-        Yhat = model(X)
+        Yhat = model.fprop(X)
 
         return T.sqr(Yhat - Y).mean()
 
