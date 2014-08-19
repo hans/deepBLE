@@ -29,6 +29,8 @@ class MeanSquaredErrorCost(cost.DefaultDataSpecsMixin, cost.Cost):
     MSE = 1/n \sum (Yhat - Y)^2
     """
 
+    supervised = True
+
     def __init__(self, *args, **kwargs):
         super(MeanSquaredErrorCost, self).__init__(*args, **kwargs)
 
