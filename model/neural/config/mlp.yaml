@@ -8,14 +8,19 @@
     },
     model: !obj:pylearn2.models.mlp.MLP {
         layers: [
-                 !obj:model.neural.core.NegatingRectifiedLinear {
+                 !obj:pylearn2.models.mlp.RectifiedLinear {
                      layer_name: 'h0',
-                     dim: 400,
+                     dim: 500,
                      irange: .5,
                  },
-                 !obj:model.neural.core.NegatingRectifiedLinear {
+                 !obj:pylearn2.models.mlp.RectifiedLinear {
                      layer_name: 'h1',
-                     dim: 400,
+                     dim: 500,
+                     irange: .5,
+                 },
+                 !obj:pylearn2.models.mlp.RectifiedLinear {
+                     layer_name: 'h2',
+                     dim: 500,
                      irange: .5,
                  },
                  !obj:pylearn2.models.mlp.Linear {
