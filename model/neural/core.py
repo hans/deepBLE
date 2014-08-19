@@ -69,16 +69,12 @@ class NegatingRectifiedLinear(mlp.RectifiedLinear):
     def __init__(self, **kwargs):
         super(NegatingRectifiedLinear, self).__init__(**kwargs)
 
-    @wraps(mlp.Layer.set_input_space)
-    def set_input_space(self, space):
-        super(NegatingRectifiedLinear, self).set_input_space(space)
+        # Build negating matrix now that we know our output dimensions
 
-        # Build negating matrix now that we know our input dimensions
+        out_dim = self.get_output_space().get_total_dimension()
 
-        in_dim = self.get_input_space().get_total_dimension()
-
-        num_positive = in_dim / 2
-        num_negative = in_dim - num_positive
+        num_positive = out_dim / 2
+        num_negative = out_dim - num_positive
 
         self.modifier = theano.shared(np.diag(np.concatenate((
             np.ones(num_positive), -1 * np.ones(num_negative)))))
@@ -86,7 +82,9 @@ class NegatingRectifiedLinear(mlp.RectifiedLinear):
     @wraps(mlp.Layer.fprop)
     def fprop(self, state_below):
         p = super(NegatingRectifiedLinear, self).fprop(state_below)
-        return self.modifier * p
+
+        # p is n_samples x n_nodes
+        return p * self.modifier
 
 
 class NeuralTranslationModel(TranslationModel):
