@@ -48,7 +48,7 @@
              dataset_name: 'dev'
         },
         !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
-             dataset_name: 'dev',
+             channel_name: 'dev_objective',
              save_path: "${PYLEARN2_TRAIN_FILE_FULL_STEM}_best.pkl"
         },
     ],
