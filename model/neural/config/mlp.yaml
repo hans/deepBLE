@@ -52,5 +52,5 @@
              save_path: "${PYLEARN2_TRAIN_FILE_FULL_STEM}_best.pkl"
         },
     ],
-    save_freq: 1
+    save_freq: 20
 }
