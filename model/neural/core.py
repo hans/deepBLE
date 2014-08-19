@@ -88,7 +88,7 @@ class NegatingRectifiedLinear(mlp.RectifiedLinear):
         p = super(NegatingRectifiedLinear, self).fprop(state_below)
 
         # p is n_samples x n_nodes
-        return p * self.modifier
+        return T.dot(p, self.modifier)
 
 
 class NeuralTranslationModel(TranslationModel):
