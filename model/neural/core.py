@@ -69,13 +69,19 @@ class NegatingRectifiedLinear(mlp.RectifiedLinear):
     def __init__(self, **kwargs):
         super(NegatingRectifiedLinear, self).__init__(**kwargs)
 
+    @wraps(mlp.Layer.set_input_space)
+    def set_input_space(self, space):
+        super(NegatingRectifiedLinear, self).set_input_space(space)
+
+        # Build negating matrix now that we know our input dimensions
+
         in_dim = self.get_input_space().get_total_dimension()
 
         num_positive = in_dim / 2
         num_negative = in_dim - num_positive
 
-        self.modifier = theano.shared(np.concatenate((
-            np.ones(num_positive), -1 * np.ones(num_negative))))
+        self.modifier = theano.shared(np.diag(np.concatenate((
+            np.ones(num_positive), -1 * np.ones(num_negative)))))
 
     @wraps(mlp.Layer.fprop)
     def fprop(self, state_below):
