@@ -36,7 +36,7 @@
         monitoring_dataset:
             {
                 'train' : *train,
-                'valid' : !obj:model.neural.get_dataset {
+                'dev' : !obj:model.neural.get_dataset {
                             which: 'dev'
                           },
             },
