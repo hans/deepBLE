@@ -10,12 +10,12 @@
         layers: [
                  !obj:pylearn2.models.mlp.RectifiedLinear {
                      layer_name: 'h0',
-                     dim: 200,
+                     dim: 400,
                      irange: .5,
                  },
                  !obj:pylearn2.models.mlp.RectifiedLinear {
                      layer_name: 'h1',
-                     dim: 200,
+                     dim: 400,
                      irange: .5,
                  },
                  !obj:pylearn2.models.mlp.Linear {
@@ -28,7 +28,7 @@
     },
     algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
         cost: !obj:model.neural.core.MeanSquaredErrorCost { },
-        learning_rate: 0.1,
+        learning_rate: 0.5,
         batch_size: 10,
         monitoring_dataset:
             {
@@ -48,7 +48,7 @@
              dataset_name: 'dev'
         },
         !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
-             channel_name: 'dev_objective',
+             dataset_name: 'dev',
              save_path: "${PYLEARN2_TRAIN_FILE_FULL_STEM}_best.pkl"
         },
     ],
