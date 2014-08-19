@@ -1,0 +1,58 @@
+# MLP config originally designed for testing with 200-dim input, output
+# vectors. Now dimensions are configurable via NeuralTranslationModel
+# params!
+
+!obj:pylearn2.train.Train {
+    dataset: &train !obj:model.neural.get_dataset {
+        which: 'train'
+    },
+    model: !obj:pylearn2.models.mlp.MLP {
+        layers: [
+                 !obj:pylearn2.models.mlp.RectifiedLinear {
+                     layer_name: 'h0',
+                     dim: 200,
+                     irange: .05,
+                 },
+                 !obj:pylearn2.models.mlp.RectifiedLinear {
+                     layer_name: 'h1',
+                     dim: 200,
+                     irange: .05,
+                 },
+                 !obj:pylearn2.models.mlp.Linear {
+                     dim: 200,
+                     layer_name: 'y',
+                     irange: .005
+                 }
+                ],
+        nvis: 200,
+    },
+    algorithm: !obj:pylearn2.training_algorithms.bgd.BGD {
+        line_search_mode: 'exhaustive',
+        batch_size: 200,
+        conjugate: 1,
+        reset_conjugate: 0,
+        reset_alpha: 0,
+        updates_per_batch: 10,
+        monitoring_dataset:
+            {
+                'train' : *train,
+                'valid' : !obj:model.neural.get_dataset {
+                            which: 'dev'
+                          },
+            },
+        termination_criterion: !obj:pylearn2.termination_criteria.MonitorBased {
+            channel_name: "dev_y_mse",
+            prop_decrease: 0.01,
+            N: 100
+        },
+    },
+    extensions: [
+        !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
+             channel_name: 'dev_y_mse',
+             save_path: "${PYLEARN2_TRAIN_FILE_FULL_STEM}_best.pkl"
+        },
+    ],
+    save_freq: 1
+
+  # TODO MonitorBasedLRAdjuster
+}

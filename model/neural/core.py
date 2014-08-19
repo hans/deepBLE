@@ -7,6 +7,20 @@ import numpy as np
 from model.core import TranslationModel
 
 
+def get_dataset(which):
+    """
+    Hacky way to allow us to leave the dataset unspecified in the
+    Pylearn config.
+
+    This function is just assigned some state from a running
+    NeuralTranslationModel, and provides that state to Pylearn when
+    requested. Note that this is not thread-safe among multiple
+    neural models which may be running in the same process!
+    """
+
+    return getattr(get_dataset, which)
+
+
 class NeuralTranslationModel(TranslationModel):
     """A translation model which trains a deep neural network on the
     given training examples.
@@ -26,33 +40,21 @@ class NeuralTranslationModel(TranslationModel):
     """Ratio of data input used for training (compared to total data
     input). Remaining data is held out for development testing."""
 
-    def __init__(self, source_vsm, target_vsm, bias=BIAS,
-                 hidden_layer_size=HIDDEN_LAYER_SIZE,
-                 learning_rate=LEARNING_RATE, batch_size=BATCH_SIZE,
-                 verbose=False):
-
-        from pylearn2.costs import mlp as mlp_costs
-        from pylearn2.costs.cost import SumOfCosts
-        from pylearn2.models import mlp
-        from pylearn2.train import Train
-        from pylearn2.training_algorithms import sgd
-        from pylearn2.training_algorithms.sgd import MonitorBasedLRAdjuster
-        from pylearn2.termination_criteria import (EpochCounter, ChannelTarget,
-                                                   MonitorBased)
-        from pylearn2.datasets.dense_design_matrix import DenseDesignMatrix
-        import theano
-
+    def __init__(self, source_vsm, target_vsm,
+                 config_file='model/neural/mlp.yaml', verbose=False):
         super(NeuralTranslationModel, self).__init__(source_vsm, target_vsm)
 
         self.network = None
+        self.network_fn = None
 
-        self.bias = bias
-        self.hidden_layer_size = hidden_layer_size
-        self.learning_rate = learning_rate
-        self.batch_size = batch_size
+        # TODO make configurable
+        self.network_cfg = config_file
+
         self.verbose = verbose
 
     def build_datasets(self, source_vecs, target_vecs):
+        from pylearn2.datasets.dense_design_matrix import DenseDesignMatrix
+
         split = int(len(source_vecs) * self.TRAIN_DEV_SPLIT)
 
         X_train = np.mat(source_vecs[:split])
@@ -63,55 +65,53 @@ class NeuralTranslationModel(TranslationModel):
         Y_dev = np.mat(target_vecs[split:])
         ds_dev = DenseDesignMatrix(X=X_dev, y=Y_dev)
 
-        return ds_train, ds_dev
+        # Assign to global object
+        get_dataset.train = ds_train
+        get_dataset.dev = ds_dev
 
     def train_vecs(self, source_vecs, target_vecs):
-        ds_train, ds_dev = self.build_datasets(source_vecs, target_vecs)
+        self.build_datasets(source_vecs, target_vecs)
 
-        # Determine visible layer dimensions
+        from pylearn2.models import mlp
+        from pylearn2.space import VectorSpace
+        from pylearn2.utils.serial import load_train_file
+
+        # TODO allow overrides via parameters
+        train = load_train_file(self.network_cfg)
+
+        # Change input layer size
+        model = train.model
+        if not isinstance(model, mlp.MLP):
+            raise RuntimeError("Provided network config does not use "
+                               "MLP model -- not supported by this "
+                               "translation model code")
+
         input_size = self.source_vsm.layer1_size
+        model.set_input_space(VectorSpace(dim=input_size))
+
+        # Change output layer size
+        final_layer = model.layers[-1]
+        if not isinstance(final_layer, mlp.Linear):
+            raise RuntimeError("Provided network config does not have "
+                               "a linear output layer -- not supported "
+                               "by this translation model code")
+
         output_size = self.target_vsm.layer1_size
+        # TODO is this sufficient for the linear layer? Might need to
+        # call some setter which updates internal state I don't
+        # understand
+        final_layer.dim = output_size
 
-        # Hidden layer with sigmoid activation function
-        hidden_layer = mlp.Sigmoid(layer_name='hidden', irange=.05, init_bias=1.,
-                                   use_bias=self.bias,
-                                   dim=self.hidden_layer_size)
+        # Now begin training
+        train.main_loop()
 
-        # Output layer with linear activation function
-        output_layer = mlp.Linear(output_size, 'output', irange=.05,
-                                  use_bias=self.bias)
-
-        layers = [hidden_layer, output_layer]
-
-        # Now construct neural network
-        self.network = mlp.MLP(layers, nvis=input_size)
-
-        # Build cost function
-        error_cost = mlp_costs.Default()
-        regularization_cost = mlp_costs.WeightDecay([1., 1.])
-        cost_expr = SumOfCosts([error_cost])#, (.01, regularization_cost)])
-
-        # Initialize SGD training algo
-        algorithm = sgd.SGD(cost=cost_expr,
-                            learning_rate=self.learning_rate,
-                            batch_size=self.batch_size,
-                            termination_criterion=EpochCounter(50000),#MonitorBased(.000001, N=5),
-                            monitoring_dataset=ds_train)#cv)
-
-        # Now build trainer
-
-        # Extension: update learning rate based on cost changes
-        extensions = [MonitorBasedLRAdjuster()]
-
-        trainer = Train(model=self.network, dataset=ds_train,
-                        algorithm=algorithm, extensions=extensions)
-
-        # TODO constant-ize time budget
-        trainer.main_loop()
+        self.network = train.model
 
         self.make_network_fn()
 
     def make_network_fn(self):
+        import theano
+
         X_sym = self.network.get_input_space().make_theano_batch()
         Y_sym = self.network.fprop(X_sym)
         self.network_fn = theano.function([X_sym], Y_sym)
