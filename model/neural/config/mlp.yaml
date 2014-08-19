@@ -28,7 +28,7 @@
     },
     algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
         cost: !obj:model.neural.core.MeanSquaredErrorCost { },
-        learning_rate: 0.01,
+        learning_rate: 0.1,
         batch_size: 10,
         monitoring_dataset:
             {
