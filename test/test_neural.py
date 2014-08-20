@@ -1,7 +1,7 @@
 from gensim.models import Word2Vec
 from nose.tools import assert_equal
 
-from deepble.model.neural import NeuralTranslationModel
+from deepble.model.mlp.neural import NeuralTranslationModel
 from deepble.model.runner import evaluate_model
 
 

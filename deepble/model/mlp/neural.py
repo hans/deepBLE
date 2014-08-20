@@ -111,7 +111,8 @@ class NeuralTranslationModel(TranslationModel):
     input). Remaining data is held out for development testing."""
 
     def __init__(self, source_vsm, target_vsm,
-                 config_file='model/neural/config/mlp.yaml', verbose=False):
+                 config_file='deepble/model/mlp/config/mlp.yaml',
+                 verbose=False):
         super(NeuralTranslationModel, self).__init__(source_vsm, target_vsm)
 
         self.network = None
