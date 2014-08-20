@@ -92,7 +92,9 @@ def parse_args():
 MODEL_MAPPING = {
     'identity': models.IdentityTranslationModel,
     'linear': models.LinearTranslationModel,
-    'neural': models.NeuralTranslationModel,
+    'neural': models.mlp.NeuralTranslationModel,
+    'linear_sgd': partial(models.mlp.MLPTranslationModel,
+                          config_file='deepble/model/mlp/config/linear.yaml'),
     'percentile_frequency': models.PercentileFrequencyTranslationModel,
     'random': models.RandomTranslationModel,
     'clustered/linear': partial(models.ClusteredTranslationModel,

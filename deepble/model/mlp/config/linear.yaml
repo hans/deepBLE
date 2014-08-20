@@ -1,0 +1,45 @@
+# MLP config to train linear transformation by gradient descent rather
+# than via our analytic pseudoinverse solution.
+
+!obj:pylearn2.train.Train {
+    dataset: &train !obj:model.mlp.core.get_dataset {
+        which: 'train'
+    },
+    model: !obj:pylearn2.models.mlp.MLP {
+        layers: [
+                 !obj:pylearn2.models.mlp.Linear {
+                     dim: 200,
+                     layer_name: 'y',
+                     irange: .5
+                 }
+                ],
+        nvis: 200,
+    },
+    algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
+        cost: !obj:model.mlp.core.MeanSquaredErrorCost { },
+        learning_rate: 0.5,
+        batch_size: 10,
+        monitoring_dataset:
+            {
+                'train' : *train,
+                'dev' : !obj:model.mlp.core.get_dataset {
+                            which: 'dev'
+                          },
+            },
+        termination_criterion: !obj:pylearn2.termination_criteria.MonitorBased {
+            channel_name: "dev_objective",
+            prop_decrease: 0.00001,
+            N: 100
+        },
+    },
+    extensions: [
+        !obj:pylearn2.training_algorithms.sgd.MonitorBasedLRAdjuster {
+             dataset_name: 'dev'
+        },
+        !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
+             channel_name: 'dev_objective',
+             save_path: "${PYLEARN2_TRAIN_FILE_FULL_STEM}_best.pkl"
+        },
+    ],
+    save_freq: 20
+}

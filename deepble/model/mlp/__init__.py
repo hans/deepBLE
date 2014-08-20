@@ -1,1 +1,2 @@
+from core import MLPTranslationModel
 from neural import NeuralTranslationModel

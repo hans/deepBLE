@@ -1,6 +1,6 @@
 from identity import IdentityTranslationModel
 from linear import LinearTranslationModel
-from mlp import NeuralTranslationModel
+import mlp
 from percentile_frequency import PercentileFrequencyTranslationModel
 from random import RandomTranslationModel
 from clustered import ClusteredTranslationModel
