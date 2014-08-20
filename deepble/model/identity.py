@@ -1,4 +1,4 @@
-from model import TranslationModel
+from deepble.model import TranslationModel
 
 
 class IdentityTranslationModel(TranslationModel):

@@ -1,6 +1,6 @@
 import operator
 
-from model import TranslationModel
+from deepble.model import TranslationModel
 
 
 class PercentileFrequencyTranslationModel(TranslationModel):

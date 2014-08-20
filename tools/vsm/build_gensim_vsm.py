@@ -4,9 +4,9 @@ import multiprocessing
 
 from gensim.corpora.dictionary import Dictionary
 
-from vsm.corpora.text import TextCorpus
-from vsm.corpora.wiki import WikiSentenceCorpus
-from vsm.word2vec import Word2Vec
+from deepble.vsm.corpora.text import TextCorpus
+from deepble.vsm.corpora.wiki import WikiSentenceCorpus
+from deepble.vsm.word2vec import Word2Vec
 
 
 DEFAULT_WINDOW_SIZE = 10

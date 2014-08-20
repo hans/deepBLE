@@ -13,8 +13,8 @@ import sys
 from gensim.models import Word2Vec
 from numpy import mean, std
 
-import model.all
-from model.runner import evaluate_model
+import deepble.model.all as models
+from deepble.model.runner import evaluate_model
 
 
 def load_seed_data(path):
@@ -90,16 +90,16 @@ def parse_args():
 
 
 MODEL_MAPPING = {
-    'identity': model.all.IdentityTranslationModel,
-    'linear': model.all.LinearTranslationModel,
-    'neural': model.all.NeuralTranslationModel,
-    'percentile_frequency': model.all.PercentileFrequencyTranslationModel,
-    'random': model.all.RandomTranslationModel,
-    'clustered/linear': partial(model.all.ClusteredTranslationModel,
-                                submodel=model.all.LinearTranslationModel),
-    'clustered/affine': partial(model.all.ClusteredTranslationModel,
-                                submodel=model.all.AffineTranslationModel),
-    'affine': model.all.AffineTranslationModel,
+    'identity': models.IdentityTranslationModel,
+    'linear': models.LinearTranslationModel,
+    'neural': models.NeuralTranslationModel,
+    'percentile_frequency': models.PercentileFrequencyTranslationModel,
+    'random': models.RandomTranslationModel,
+    'clustered/linear': partial(models.ClusteredTranslationModel,
+                                submodel=models.LinearTranslationModel),
+    'clustered/affine': partial(models.ClusteredTranslationModel,
+                                submodel=models.AffineTranslationModel),
+    'affine': models.AffineTranslationModel,
 }
 
 def main(arguments):

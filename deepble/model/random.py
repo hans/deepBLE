@@ -1,6 +1,6 @@
 from numpy.random import random
 
-from model import TranslationModel
+from deepble.model import TranslationModel
 
 
 class RandomTranslationModel(TranslationModel):

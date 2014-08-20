@@ -1,12 +1,11 @@
 from collections import defaultdict
 import logging
-import pickle
 
 import numpy as np
 from sklearn.cluster import MiniBatchKMeans
 
-from model import TranslationModel
-from model.linear import LinearTranslationModel
+from deepble.model import TranslationModel
+from deepble.model.linear import LinearTranslationModel
 
 
 class ClusteredTranslationModel(TranslationModel):

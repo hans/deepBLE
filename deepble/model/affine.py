@@ -1,10 +1,7 @@
-import logging
-import pickle
-
 import numpy as np
 from numpy.linalg import pinv
 
-from model import TranslationModel
+from deepble.model import TranslationModel
 
 
 def add_bias(matrix):

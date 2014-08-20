@@ -1,11 +1,10 @@
 from itertools import izip
-import pickle
 from random import sample
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 
-from model.core import TranslationModel
+from deepble.model.core import TranslationModel
 
 
 class LogisticRegressionTranslationModel(TranslationModel):

@@ -18,7 +18,7 @@ from pylearn2.utils import wraps
 import theano
 import theano.tensor as T
 
-from model.core import TranslationModel
+from deepble.model.core import TranslationModel
 
 
 def get_dataset(which):

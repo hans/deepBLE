@@ -1,8 +1,8 @@
 from gensim.models import Word2Vec
 from nose.tools import assert_equal
 
-from model.linear import LinearTranslationModel
-from model.runner import evaluate_model
+from deepble.model.linear import LinearTranslationModel
+from deepble.model.runner import evaluate_model
 
 
 def load_vsm_fixture(name):

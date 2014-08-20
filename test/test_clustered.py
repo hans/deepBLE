@@ -1,8 +1,8 @@
 from mock import Mock
 from numpy.testing import assert_array_almost_equal
 
-from model.clustered import ClusteredTranslationModel
-from model.linear import LinearTranslationModel
+from deepble.model.clustered import ClusteredTranslationModel
+from deepble.model.linear import LinearTranslationModel
 
 
 def test_clustered():
