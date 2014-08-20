@@ -14,6 +14,7 @@ import theano
 import theano.tensor as T
 
 from deepble.model.core import TranslationModel
+from deepble.model.mlp import MLPTranslationModel
 
 
 class NegatingRectifiedLinear(mlp.RectifiedLinear):
