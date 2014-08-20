@@ -9,6 +9,7 @@ annoying load times during non-MLP-related testing.
 
 import numpy as np
 from pylearn2.costs import cost
+from pylearn2.models import mlp
 import theano.tensor as T
 
 from deepble.model.core import TranslationModel
