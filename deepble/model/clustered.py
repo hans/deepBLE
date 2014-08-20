@@ -2,15 +2,23 @@ from collections import defaultdict
 import logging
 
 import numpy as np
+from sklearn import manifold
 from sklearn.cluster import MiniBatchKMeans
 
 from deepble.model import TranslationModel
 from deepble.model.linear import LinearTranslationModel
+from deepble.util import MockVSM
 
 
 class ClusteredTranslationModel(TranslationModel):
-    """Learns a mapping between clusters of the source VSM and the
-    target VSM."""
+    """
+    Learns a mapping between clusters of the source VSM and the
+    target VSM.
+
+    For each cluster of the source VSM, we compute lower-dimensional
+    representations of the words in the cluster. We then learn a mapping
+    from this low-dimensional representation to the output space.
+    """
 
     def __init__(self, source_vsm, target_vsm, submodel=LinearTranslationModel,
                  num_clusters=None):
@@ -31,32 +39,57 @@ class ClusteredTranslationModel(TranslationModel):
                                                         target_vsm)
 
         # TODO guess clustering more scientifically
-        self.num_clusters = int(num_clusters) or 1
+        self.num_clusters = int(num_clusters) or 50
 
         # k * N array of cluster centroids (where k = number of
         # clusters). Constructed lazily in `build_clusters`
         self.clusters = None
+
+        # k-element array (where k = number of clusters) of transformers
+        # which project source-VSM vectors onto the low-dimensional
+        # embeddings particular to each cluster
+        self.cluster_spaces = None
 
         # Per-cluster submodels
         self.submodel = submodel
         self.models = None
 
     def build_clusters(self):
-        """Retrieve all word representations from the source VSM and
-        compute clusters"""
+        """
+        Retrieve all word representations from the source VSM and
+        compute clusters
+        """
 
         self.clusters = MiniBatchKMeans(n_clusters=self.num_clusters)
 
-        print 'Learning %i clusters' % self.num_clusters
-        self.clusters.fit(self.source_vsm.syn0)
+        logging.info('Learning %i clusters', self.num_clusters)
+        self.clusters.fit(self.source_vsm.syn0norm)
 
         # TODO print cluster information
+
+    def build_cluster_transformer(self, source_vecs,
+                                  method=manifold.LocallyLinearEmbedding):
+        """
+        Compute a lower-dimensional representation of the given
+        source-VSM vectors, and return an object which can
+        `.transform()` vectors from the source VSM into this
+        lower-dimensional embedding.
+        """
+
+        # TODO try different dimensionalities
+        dimensionality = 50
+
+        transformer = method(n_components=dimensionality)
+        transformer.fit(np.array(source_vecs))
+
+        return transformer
 
     def train_vecs(self, source_vecs, target_vecs):
         if not self.clusters:
             self.build_clusters()
 
         self.models = [None] * self.num_clusters
+        self.cluster_spaces = [None] * self.num_clusters
 
         # n_vecs * d array
         X_cluster = np.array(source_vecs)
@@ -77,22 +110,38 @@ class ClusteredTranslationModel(TranslationModel):
             raise RuntimeError("Missing source vectors for some "
                                "clusters")
 
-        for cluster_id in range(self.num_clusters):
-            model = self.submodel(self.source_vsm, self.target_vsm)
-            source_vecs, target_vecs = zip(*(vecs_by_cluster[cluster_id]))
-            model.train_vecs(list(source_vecs), list(target_vecs))
+        for cluster_id, vectors in vecs_by_cluster.iteritems():
+            # source_vecs is a list of vectors in the global source VSM
+            # -- not the cluster
+            source_vecs, target_vecs = zip(*vectors)
+
+            cluster_transformer = self.build_cluster_transformer(source_vecs)
+            cluster_contents = cluster_transformer.transform(source_vecs)
+
+            cluster_vsm = MockVSM(cluster_contents)
+
+            model = self.submodel(cluster_vsm, self.target_vsm)
+            model.train_vecs(list(cluster_contents), list(target_vecs))
 
             self.models[cluster_id] = model
+            self.cluster_spaces[cluster_id] = cluster_transformer
 
     def translate_vec(self, source_vec):
         if self.clusters is None or self.models is None:
             raise RuntimeError("Model not yet trained")
 
         cluster_id = self.clusters.predict([source_vec])[0]
-        return self.models[cluster_id].translate_vec(source_vec)
+
+        # Project the vector into the low-dimensional space associated
+        # with the matched cluster
+        projected = self.cluster_spaces[cluster_id].transform([source_vec])[0]
+
+        # Now translate this projected vector into the target space
+        # using the submodel associated with the matched cluster
+        return self.models[cluster_id].translate_vec(projected)
 
     def load_object(self, obj):
-        self.clusters, submodel_type, submodel_data = obj
+        self.clusters, self.cluster_spaces, submodel_type, submodel_data = obj
         self.num_clusters = self.clusters.n_clusters
 
         self.models = []
@@ -103,5 +152,5 @@ class ClusteredTranslationModel(TranslationModel):
             self.models.append(model)
 
     def save_object(self):
-        return (self.clusters, self.submodel,
+        return (self.clusters, self.cluster_spaces, self.submodel,
                 [model.save_object() for model in self.models])
