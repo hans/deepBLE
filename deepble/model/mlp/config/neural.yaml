@@ -3,7 +3,7 @@
 # params!
 
 !obj:pylearn2.train.Train {
-    dataset: &train !obj:model.mlp.core.get_dataset {
+    dataset: &train !obj:deepble.model.mlp.core.get_dataset {
         which: 'train'
     },
     model: !obj:pylearn2.models.mlp.MLP {
@@ -32,13 +32,13 @@
         nvis: 200,
     },
     algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
-        cost: !obj:model.mlp.core.MeanSquaredErrorCost { },
+        cost: !obj:deepble.model.mlp.core.MeanSquaredErrorCost { },
         learning_rate: 0.5,
         batch_size: 10,
         monitoring_dataset:
             {
                 'train' : *train,
-                'dev' : !obj:model.mlp.core.get_dataset {
+                'dev' : !obj:deepble.model.mlp.core.get_dataset {
                             which: 'dev'
                           },
             },
