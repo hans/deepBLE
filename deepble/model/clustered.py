@@ -116,7 +116,7 @@ class ClusteredTranslationModel(TranslationModel):
             source_vecs, target_vecs = zip(*vectors)
 
             cluster_transformer = self.build_cluster_transformer(source_vecs)
-            cluster_contents = cluster_transformer.transform(source_vecs)
+            cluster_contents = cluster_transformer.predict(source_vecs)
 
             cluster_vsm = MockVSM(cluster_contents)
 
@@ -134,7 +134,7 @@ class ClusteredTranslationModel(TranslationModel):
 
         # Project the vector into the low-dimensional space associated
         # with the matched cluster
-        projected = self.cluster_spaces[cluster_id].transform([source_vec])[0]
+        projected = self.cluster_spaces[cluster_id].predict([source_vec])[0]
 
         # Now translate this projected vector into the target space
         # using the submodel associated with the matched cluster
