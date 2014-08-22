@@ -39,7 +39,7 @@ class ClusteredTranslationModel(TranslationModel):
                                                         target_vsm)
 
         # TODO guess clustering more scientifically
-        self.num_clusters = (num_clusters and int(num_clusters)) or 50
+        self.num_clusters = (num_clusters and int(num_clusters)) or 500
 
         # k * N array of cluster centroids (where k = number of
         # clusters). Constructed lazily in `build_clusters`
@@ -60,7 +60,8 @@ class ClusteredTranslationModel(TranslationModel):
         compute clusters
         """
 
-        self.clusters = MiniBatchKMeans(n_clusters=self.num_clusters)
+        self.clusters = MiniBatchKMeans(n_clusters=self.num_clusters,
+                                        batch_size=int(self.num_clusters * 1.8))
 
         logging.info('Learning %i clusters', self.num_clusters)
         self.clusters.fit(self.source_vsm.syn0norm)
