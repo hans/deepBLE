@@ -89,3 +89,7 @@ class LogisticRegressionTranslationModel(TranslationModel):
 
         ret = sorted(self.target_vsm.vocab.iterkeys(), key=score, reverse=True)
         return ret[:n]
+
+    def translate_vec(self, source_vec):
+        raise NotImplementedError("Model does not support word vector "
+                                  "output")
