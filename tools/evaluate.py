@@ -102,6 +102,7 @@ MODEL_MAPPING = {
     'clustered/affine': partial(models.ClusteredTranslationModel,
                                 submodel=models.AffineTranslationModel),
     'affine': models.AffineTranslationModel,
+    'logistic_regression': models.LogisticRegressionTranslationModel,
 }
 
 def main(arguments):

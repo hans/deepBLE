@@ -1,5 +1,6 @@
 from identity import IdentityTranslationModel
 from linear import LinearTranslationModel
+from logistic_regression import LogisticRegressionTranslationModel
 import mlp
 from percentile_frequency import PercentileFrequencyTranslationModel
 from random import RandomTranslationModel
