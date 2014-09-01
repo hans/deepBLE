@@ -28,7 +28,7 @@ class LogisticRegressionTranslationModel(TranslationModel):
         """
 
         # Build positive examples
-        X_pos = np.mat([np.concatenate(source, target)
+        X_pos = np.mat([np.concatenate((source, target))
                         for source, target in izip(source_vecs, target_vecs)])
         y_pos = np.repeat(1, X_pos.shape[0])
 
@@ -44,12 +44,12 @@ class LogisticRegressionTranslationModel(TranslationModel):
                             if i != j]
         negative_example_indices = np.random.choice(negative_indices,
                                                     num_negative)
-        X_neg = np.mat([np.concatenate(source_vecs[i], target_vecs[j])
+        X_neg = np.mat([np.concatenate((source_vecs[i], target_vecs[j]))
                         for i, j in negative_example_indices])
         y_neg = np.repeat(0, X_neg.shape[0])
 
         # Construct final result
-        X, y = np.concatenate(X_pos, X_neg), np.concatenate(y_pos, y_neg)
+        X, y = np.concatenate((X_pos, X_neg)), np.concatenate((y_pos, y_neg))
 
         return X, y
 
