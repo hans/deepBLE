@@ -115,6 +115,11 @@ def main(arguments):
         vsm_source = Word2Vec.load_normalized(arguments.vsm_source)
         vsm_target = Word2Vec.load_normalized(arguments.vsm_target)
 
+        if vsm_source.syn0norm is None:
+            vsm_source.init_sims()
+        if vsm_target.syn0norm is None:
+            vsm_target.init_sims()
+
     # Instantiate model
     model_class = MODEL_MAPPING[arguments.model]
     model = model_class(vsm_source, vsm_target, **arguments.model_arguments)
