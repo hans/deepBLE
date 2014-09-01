@@ -123,8 +123,9 @@ class Word2Vec(gensim.models.Word2Vec):
     def load_normalized(cls, *args, **kwargs):
         model = super(Word2Vec, cls).load(*args, **kwargs)
 
-        logging.info("Mapping model syn0 to saved syn0norm")
-        model.syn0 = model.syn0norm
+        if model.syn0norm is not None:
+            logging.info("Mapping model syn0 to saved syn0norm")
+            model.syn0 = model.syn0norm
 
         return model
 
