@@ -18,6 +18,8 @@ class Word2Vec(gensim.models.Word2Vec):
           term frequency in the dynamically pruned vocab, and the
           `drop_capitals` argument to indicate that terms beginning with
           capital letters should not be included in the final vocabulary.
+    - Support loading from GloVe word vector format
+    - Support saving / loading with normalized word vectors only
     """
 
     def __init__(self, vocab_path=None, drop_capitals=False, **kwargs):
@@ -116,3 +118,20 @@ class Word2Vec(gensim.models.Word2Vec):
 
         with open(vocab_path, 'w') as vocab_f:
             pickle.dump(self.vocab, vocab_f)
+
+    @classmethod
+    def load_normalized(cls, *args, **kwargs):
+        model = super(Word2Vec, cls).load(*args, **kwargs)
+
+        logging.info("Mapping model syn0 to saved syn0norm")
+        model.syn0 = model.syn0norm
+
+        return model
+
+    def save_normalized(self, *args, **kwargs):
+        if 'ignore' in kwargs:
+            kwargs['ignore'].append('syn0')
+        else:
+            kwargs['ignore'] = ['syn0']
+
+        super(Word2Vec, self).save(*args, **kwargs)

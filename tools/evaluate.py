@@ -10,11 +10,11 @@ import json
 import logging
 import sys
 
-from gensim.models import Word2Vec
 from numpy import mean, std
 
 import deepble.model.all as models
 from deepble.model.runner import evaluate_model
+from deepble.vsm.word2vec import Word2Vec
 
 
 def load_seed_data(path):
@@ -111,12 +111,8 @@ def main(arguments):
         vsm_target = Word2Vec.load_word2vec_format(arguments.vsm_target,
                                                    binary=True, norm_only=True)
     else:
-        vsm_source = Word2Vec.load(arguments.vsm_source)
-        vsm_target = Word2Vec.load(arguments.vsm_target)
-
-        # Compute normalized word vectors and drop the old ones
-        vsm_source.init_sims(replace=True)
-        vsm_target.init_sims(replace=True)
+        vsm_source = Word2Vec.load_normalized(arguments.vsm_source)
+        vsm_target = Word2Vec.load_normalized(arguments.vsm_target)
 
     # Instantiate model
     model_class = MODEL_MAPPING[arguments.model]

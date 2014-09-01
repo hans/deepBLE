@@ -15,4 +15,4 @@ python -c "
 from vsm.word2vec import Word2Vec
 
 m = Word2Vec.load_glove_format('${1}', '${2}', norm_only=True)
-m.save('${3}')"
+m.save_normalized('${3}')"

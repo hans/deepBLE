@@ -15,4 +15,4 @@ python -c "
 from vsm.word2vec import Word2Vec
 
 m = Word2Vec.load_word2vec_format('${1}', fvocab='${2}', binary=True, norm_only=True)
-m.save('${3}')"
+m.save_normalized('${3}')"
