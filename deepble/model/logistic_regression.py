@@ -1,5 +1,4 @@
 from itertools import izip
-from random import sample
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
@@ -43,7 +42,8 @@ class LogisticRegressionTranslationModel(TranslationModel):
                             for i in range(len(source_vecs))
                             for j in range(len(source_vecs))
                             if i != j]
-        negative_example_indices = sample(negative_indices, num_negative)
+        negative_example_indices = np.random.choice(negative_indices,
+                                                    num_negative)
         X_neg = np.mat([np.concatenate(source_vecs[i], target_vecs[j])
                         for i, j in negative_example_indices])
         y_neg = np.repeat(0, X_neg.shape[0])
