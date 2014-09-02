@@ -43,10 +43,6 @@ class NegativeRectifiedLinear(mlp.RectifiedLinear):
         self.modifier = theano.shared(np.diag(np.concatenate((
             np.ones(num_positive), -1 * np.ones(num_negative)))))
 
-    @wraps(mlp.Layer.fprop)
-    def fprop(self, *args, **kwargs):
-        raise NotImplementedError("abstract method")
-
 
 class NegatingRectifiedLinear(NegativeRectifiedLinear):
     """
