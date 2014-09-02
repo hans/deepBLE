@@ -74,7 +74,7 @@ class NegatingRectifiedLinear(NegativeRectifiedLinear):
         return T.dot(p, self.modifier)
 
 
-class NegativeSwitchRectifiedLinear(mlp.RectifiedLinear):
+class NegativeSwitchRectifiedLinear(NegativeRectifiedLinear):
     """
     Rectified linear MLP layer which accepts negative rather than
     positive values on half of its neurons.
