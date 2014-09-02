@@ -85,7 +85,7 @@ class LogisticRegressionTranslationModel(TranslationModel):
         # in decreasing sorted order
         def score(target_word):
             # Classifier input
-            x = np.concatenate(source_vec, self._get_target_vec(target_word))
+            x = np.concatenate((source_vec, self._get_target_vec(target_word)))
 
             return self.model.predict(x)
 
