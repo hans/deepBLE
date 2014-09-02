@@ -31,7 +31,7 @@ class NegativeRectifiedLinear(mlp.RectifiedLinear):
 
     @wraps(mlp.Layer.set_input_space)
     def set_input_space(self, space):
-        super(NegatingRectifiedLinear, self).set_input_space(space)
+        super(NegativeRectifiedLinear, self).set_input_space(space)
 
         # Build negating matrix now that we know our layer dimensions
 
