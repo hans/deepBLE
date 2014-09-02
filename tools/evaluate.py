@@ -84,7 +84,7 @@ def parse_args():
         arguments.model_arguments = {}
     else:
         with open(arguments.model_config, 'r') as config_f:
-            arguments.model_arguments = json.load(arguments.model_arguments)
+            arguments.model_arguments = json.load(config_f)
 
     return arguments
 
