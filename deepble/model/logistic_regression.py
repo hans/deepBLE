@@ -42,8 +42,10 @@ class LogisticRegressionTranslationModel(TranslationModel):
                             for i in range(len(source_vecs))
                             for j in range(len(source_vecs))
                             if i != j]
-        negative_example_indices = np.random.randint(len(source_vecs),
-                                                     size=num_negative)
+        negative_example_indices = [negative_indices[i]
+                                    for i
+                                    in np.random.randint(len(source_vecs),
+                                                         size=num_negative)]
         X_neg = np.mat([np.concatenate((source_vecs[i], target_vecs[j]))
                         for i, j in negative_example_indices])
         y_neg = np.repeat(0, X_neg.shape[0])
